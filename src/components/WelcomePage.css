@@ -1,0 +1,39 @@
+.welcome-container {
+  height: 100vh;
+  width: 100%;
+  background-image: url("../assets/gym.jpg");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+h1 {
+  color: white; /* Make Welcome text white */
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  gap: 15px;
+}
+
+.btn {
+  background-color: white; /* White box for buttons */
+  color: black;
+  padding: 12px 20px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 200px;
+  text-align: center;
+}
+
+.btn:hover {
+  background-color: lightgray;
+}
