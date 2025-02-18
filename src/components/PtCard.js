@@ -2,14 +2,13 @@ import React, { useState } from "react";
 import "./ProfileCard.css";
 import gymImage from "../assets/cam.jpg"; // Adjust path if needed
 
-const ProfileCard = () => {
+const PTCard = () => {
   const [userInfo, setUserInfo] = useState({
-    height: "180 cm",
-    weight: "75 kg",
-    plan: "Premium Membership",
-    goal: "Muscle Gain",
-    email: "user@example.com",
-    phone: "+123 456 7890",
+    specialization: "Personal Training",
+    experience: "5 years",
+    certifications: "ACE Certified Trainer",
+    email: "trainer@example.com",
+    phone: "+987 654 3210",
   });
 
   const [editing, setEditing] = useState(false);
@@ -20,7 +19,7 @@ const ProfileCard = () => {
   };
 
   const deleteProfile = () => {
-    setUserInfo({ height: "", weight: "", plan: "", goal: "", email: "", phone: "" });
+    setUserInfo({ specialization: "", experience: "", certifications: "", email: "", phone: "" });
     setShowDropdown(false);
   };
 
@@ -43,8 +42,8 @@ const ProfileCard = () => {
       {/* Profile Details */}
       <div className="profile-card">
         <div className="profile-header">
-          <h2 className="profile-title">Member Profile</h2>
-          <span role="img" aria-label="fitness">💪</span>
+          <h2 className="profile-title">Personal Trainer Profile</h2>
+          <span role="img" aria-label="fitness">🏋️‍♂️</span>
         </div>
 
         <div className="profile-details">
@@ -68,9 +67,13 @@ const ProfileCard = () => {
 
         <div className="profile-actions">
           {editing ? (
-            <button onClick={() => setEditing(false)} className="save-btn">Save</button>
+            <button onClick={() => setEditing(false)} className="save-btn">
+               Save
+            </button>
           ) : (
-            <button onClick={() => setEditing(true)} className="edit-btn">Edit</button>
+            <button onClick={() => setEditing(true)} className="edit-btn">
+               Edit
+            </button>
           )}
           <button className="logout-btn">Logout</button>
         </div>
@@ -79,4 +82,4 @@ const ProfileCard = () => {
   );
 };
 
-export default ProfileCard;
+export default PTCard;
