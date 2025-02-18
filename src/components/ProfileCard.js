@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./ProfileCard.css";
+import gymImage from "../assets/cam.jpg"; // Adjust path if needed
 
 const ProfileCard = () => {
   const [userInfo, setUserInfo] = useState({
@@ -12,29 +13,29 @@ const ProfileCard = () => {
   });
 
   const [editing, setEditing] = useState(false);
-  const [updatedInfo, setUpdatedInfo] = useState(userInfo);
+  const [showDropdown, setShowDropdown] = useState(false);
 
-  const handleChange = (e) => {
-    setUpdatedInfo({ ...updatedInfo, [e.target.name]: e.target.value });
-  };
-
-  const handleSave = () => {
-    setUserInfo(updatedInfo);
-    setEditing(false);
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
   };
 
   return (
     <div className="profile-container">
-      {/* Profile Image Container */}
-      <div className="profile-img-wrapper">
-        <img
-          src="gym.jpg" // Replace with actual image
-          alt="Profile"
-          className="profile-img"
-        />
-      </div>
+      {/* Profile Image with Clickable Button */}
+      <div className="profile-img-wrapper" onClick={toggleDropdown}>
+  <img src={gymImage} alt="Profile" className="profile-img" />
 
-      {/* Profile Details Card */}
+  {/* Dropdown Menu inside the Circle */}
+  {showDropdown && (
+    <div className="profile-dropdown">
+      <button onClick={() => { setEditing(false); setShowDropdown(false); }}> View Profile</button>
+      <button onClick={() => { setEditing(true); setShowDropdown(false); }}> Edit Profile</button>
+    </div>
+  )}
+</div>
+
+
+      {/* Profile Details */}
       <div className="profile-card">
         <div className="profile-header">
           <h2 className="profile-title">Member Profile</h2>
@@ -49,8 +50,8 @@ const ProfileCard = () => {
                 <input
                   type="text"
                   name={key}
-                  value={updatedInfo[key]}
-                  onChange={handleChange}
+                  value={userInfo[key]}
+                  onChange={(e) => setUserInfo({ ...userInfo, [e.target.name]: e.target.value })}
                   className="profile-input"
                 />
               ) : (
@@ -62,16 +63,13 @@ const ProfileCard = () => {
 
         <div className="profile-actions">
           {editing ? (
-            <button onClick={handleSave} className="save-btn">Save</button>
+            <button onClick={() => setEditing(false)} className="save-btn">Save</button>
           ) : (
             <button onClick={() => setEditing(true)} className="edit-btn">Edit</button>
           )}
           <button className="logout-btn">Logout</button>
         </div>
       </div>
-
-      {/* Membership Status */}
-      <p className="profile-status active">● Active Membership</p>
     </div>
   );
 };
