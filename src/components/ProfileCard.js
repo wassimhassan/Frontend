@@ -63,11 +63,11 @@ const ProfileCard = () => {
 
         <div className="profile-actions">
           {editing ? (
-            <button onClick={() => setEditing(false)} className="save-btn">Save</button>
+            <button onClick={() => setEditing(false)} className="profile-save-btn">Save</button>
           ) : (
-            <button onClick={() => setEditing(true)} className="edit-btn">Edit</button>
+            <button onClick={() => setEditing(true)} className="profile-edit-btn">Edit</button>
           )}
-          <button className="logout-btn">Logout</button>
+          <button className="profile-logout-btn">Logout</button>
         </div>
       </div>
     </div>
