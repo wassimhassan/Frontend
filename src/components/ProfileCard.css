@@ -16,7 +16,6 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 24px;
-  background-image: url("/src/assets/gym.jpg");  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   color: white;
@@ -33,16 +32,12 @@ body {
 }
 
 .profile-img-wrapper img {
-    width: 130px;
-    height: 130px;
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
     border: 4px solid #00ff99;
     box-shadow: 0px 4px 8px rgba(0, 255, 153, 0.5);
     transition: transform 0.3s ease-in-out;
-}
-
-.profile-img-wrapper img:hover {
-    transform: scale(1.1);
 }
 
 /* Profile Dropdown */
@@ -70,6 +65,7 @@ body {
     cursor: pointer;
     text-align: left;
     width: 100%;
+    color: black;
 }
 
 .profile-dropdown button:hover {
@@ -88,10 +84,7 @@ body {
     padding: 20px;
     transition: transform 0.3s ease-in-out;
   }
-  
-  .profile-card:hover {
-    transform: scale(1.05);
-  }
+
   
   /* Profile Header */
   .profile-header {
@@ -126,11 +119,6 @@ body {
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-  
-  .profile-item:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-  
   /* Editable Input Fields */
   .profile-input {
     background: transparent;
@@ -208,3 +196,38 @@ body {
     text-shadow: 0px 0px 8px rgba(0, 255, 153, 0.8);
   }
   
+  .image-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 600px;
+    height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-content {
+    position: relative;
+    max-width: 80%;
+    max-height: 80%;
+  }
+  
+  .modal-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.5); /* Adds a slight background to make it visible */
+    padding: 5px 10px;
+    border-radius: 50%;
+    transition: 0.3s ease;
+  }
