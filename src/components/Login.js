@@ -25,8 +25,8 @@ const Login = () => {
         // Save token to localStorage
         localStorage.setItem("token", response.data.token);
 
-        // Redirect to dashboard or home page
-        window.location.href = "/dashboard"; // Change this to the correct route
+        // Redirect to profile page
+        window.location.href = "/profile"; // Change this to the correct route
       }
     } catch (error) {
       setError(error.response?.data?.message || "Login failed. Try again.");
