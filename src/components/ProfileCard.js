@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./ProfileCard.css";
 import gymImage from "../assets/cam.jpg"; // Or your default profile image
 
@@ -7,34 +7,26 @@ const API_BASE_URL = "http://localhost:5000/api"; // Change if using a different
 const ProfileCard = () => {
   const [userInfo, setUserInfo] = useState(null);   // Will hold the user data from backend
   const [editing, setEditing] = useState(false);
-  const [updatedInfo, setUpdatedInfo] = useState({}); 
+  const [updatedInfo, setUpdatedInfo] = useState({});
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
 
-const handleFileChange = (e) => {
-  setSelectedFile(e.target.files[0]);
-};
+  const handleFileChangeAndUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-const handleUpload = async () => {
-  try {
     const token = localStorage.getItem("token");
     if (!token) {
       alert("No token found. Please log in.");
       return;
     }
 
-    if (!selectedFile) {
-      alert("No file selected");
-      return;
-    }
-
-    // Build the form data
     const formData = new FormData();
-    formData.append("profilePicture", selectedFile);
+    formData.append("profilePicture", file);
 
-    // Post to your upload route
-    const response = await fetch("http://localhost:5000/api/auth/upload-profile-picture", {
+    const response = await fetch(`http://localhost:5000/api/auth/upload-profile-picture`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -45,15 +37,14 @@ const handleUpload = async () => {
     const data = await response.json();
     if (response.ok) {
       alert("Profile picture uploaded successfully!");
-      // Optionally refresh or set userInfo.profilePicture = data.profilePicture
+      setUserInfo((prevUserInfo) => ({
+        ...prevUserInfo,
+        profilePicture: data.profilePicture, // Update UI
+      }));
     } else {
       alert(data.message || "Failed to upload profile picture");
     }
-  } catch (error) {
-    console.error("Error uploading file:", error);
-  }
-};
-
+  };
 
   // 1️⃣ Fetch user profile on component mount
   useEffect(() => {
@@ -66,6 +57,7 @@ const handleUpload = async () => {
           return;
         }
 
+        // Fetch User Profile
         const response = await fetch(`${API_BASE_URL}/auth/profile`, {
           method: "GET",
           headers: {
@@ -77,10 +69,29 @@ const handleUpload = async () => {
         if (response.ok) {
           console.log("Fetched user profile:", data);
           setUserInfo(data);
-          setUpdatedInfo(data); // For editing
+          setUpdatedInfo(data);
         } else {
           console.error("Error fetching profile:", data.message);
         }
+
+        // Fetch Profile Picture Separately
+        const picResponse = await fetch(`${API_BASE_URL}/auth/profile-picture`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const picData = await picResponse.json();
+        if (picResponse.ok) {
+          setUserInfo((prevUserInfo) => ({
+            ...prevUserInfo,
+            profilePicture: picData.profilePicture, // Assign the fetched profile picture
+          }));
+        } else {
+          console.error("Error fetching profile picture:", picData.message);
+        }
+
       } catch (error) {
         console.error("Error fetching profile:", error);
       } finally {
@@ -91,6 +102,41 @@ const handleUpload = async () => {
     fetchProfile();
   }, []);
 
+  const deleteProfilePicture = async () => {
+    try {
+      const confirmDelete = window.confirm("Are you sure you want to delete your profile picture?");
+      if (!confirmDelete) return;
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No token found. Please log in.");
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/remove-profile-picture`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Profile picture removed successfully!");
+        setUserInfo((prevUserInfo) => ({
+          ...prevUserInfo,
+          profilePicture: "/uploads/cam.jpg", // Reset to default
+        }));
+      } else {
+        alert(data.message || "Failed to delete profile picture");
+      }
+    } catch (error) {
+      console.error("Error deleting profile picture:", error);
+    }
+  };
+
+
+
   // 2️⃣ Handle input changes in edit mode
   const handleChange = (e) => {
     setUpdatedInfo({
@@ -98,6 +144,7 @@ const handleUpload = async () => {
       [e.target.name]: e.target.value,
     });
   };
+
 
   // 3️⃣ Save updated profile to backend (PUT /api/auth/profile)
   const handleSave = async () => {
@@ -159,6 +206,14 @@ const handleUpload = async () => {
     setShowDropdown(!showDropdown);
   };
 
+  const openImageModal = () => {
+    setImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setImageModalOpen(false);
+  };
+
   if (loading) return <p>Loading profile...</p>;
   if (!userInfo) return <p>No profile data available.</p>;
 
@@ -176,7 +231,7 @@ const handleUpload = async () => {
     "dateOfBirth"
   ];
 
-  
+
 
   return (
     <div className="profile-container">
@@ -184,24 +239,49 @@ const handleUpload = async () => {
       <div className="profile-img-wrapper" onClick={toggleDropdown}>
         {/* If the user has a profilePicture field, display it; otherwise fallback */}
         <img
-          src={userInfo.profilePicture || gymImage}
+          src={userInfo.profilePicture ? `http://localhost:5000${userInfo.profilePicture}` : gymImage}
           alt="Profile"
           className="profile-img"
         />
+
         {showDropdown && (
-          <div className="profile-dropdown">
-            <button onClick={() => { setEditing(false); setShowDropdown(false); }}>
+          <div className="profile-dropdown" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => {
+              setEditing(false);
+              setShowDropdown(false);
+              openImageModal();
+            }}>
               View Profile
             </button>
-            <button onClick={() => { setEditing(true); setShowDropdown(false); }}>
-              Edit Profile
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileChangeAndUpload}
+            />
+
+            {/* Button to trigger file input */}
+            <button onClick={() => fileInputRef.current.click()} className="upload-btn">
+              Change Profile Picture
             </button>
-            <input type="file" onChange={handleFileChange} />
-            <button onClick={handleUpload}>Upload Picture</button>
+
+            <button onClick={deleteProfilePicture} className="delete-btn">
+              Delete Picture
+            </button>
           </div>
         )}
-      </div>
+        {/* Modal for Viewing Profile */}
+        {imageModalOpen && (
+          <div className="image-modal">
+            <div className="modal-content">
+              <span className="close-modal" onClick={closeImageModal}>&times;</span>
+              <img src={userInfo?.profilePicture ? `http://localhost:5000${userInfo.profilePicture}` : gymImage} alt="Profile" />
+            </div>
+          </div>
+        )}
 
+      </div>
       {/* Profile Card */}
       <div className="profile-card">
         <div className="profile-header">
@@ -211,8 +291,8 @@ const handleUpload = async () => {
 
         <div className="profile-details">
           {fieldsToShow.map((field) => {
-             // Special handling for "dateOfBirth"
-             if (field === "dateOfBirth") {
+            // Special handling for "dateOfBirth"
+            if (field === "dateOfBirth") {
               return (
                 <div key={field} className="profile-item">
                   <strong>Date of Birth:</strong>
@@ -242,23 +322,41 @@ const handleUpload = async () => {
               );
             } else {
               return (
-            <div key={field} className="profile-item">
-              <strong>{field.charAt(0).toUpperCase() + field.slice(1)}:</strong>{" "}
-              {editing ? (
-                <input
-                  type="text"
-                  name={field}
-                  value={updatedInfo[field] !== undefined ? updatedInfo[field] : ""}
-                  onChange={handleChange}
-                  className="profile-input"
-                />
-              ) : (
-                <span>{userInfo[field] !== undefined ? " " + userInfo[field] : " Not set"}</span>
-              )}
-            </div>
+                <div key={field} className="profile-item">
+                  <strong>{field.charAt(0).toUpperCase() + field.slice(1)}:</strong>{" "}
+                  {field === "sex" ? (
+                    editing ? (
+                      <select
+                        name="sex"
+                        value={updatedInfo.sex || ""}
+                        onChange={handleChange}
+                        className="profile-input"
+                      >
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                      </select>
+                    ) : (
+                      <span>{userInfo.sex ? userInfo.sex.charAt(0).toUpperCase() + userInfo.sex.slice(1) : "Not set"}</span>
+                    )
+                  ) : field === "username" || field === "email" ? (
+                    <span>{userInfo[field] !== undefined ? " " + userInfo[field] : " Not set"}</span>
+                  ) : editing ? (
+                    <input
+                      type="text"
+                      name={field}
+                      value={updatedInfo[field] !== undefined ? updatedInfo[field] : ""}
+                      onChange={handleChange}
+                      className="profile-input"
+                    />
+                  ) : (
+                    <span>{userInfo[field] !== undefined ? " " + userInfo[field] : " Not set"}</span>
+                  )}
+
+                </div>
               );
             }
-            })}
+          })}
         </div>
 
         <div className="profile-actions">
