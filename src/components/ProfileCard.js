@@ -198,7 +198,7 @@ const ProfileCard = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     alert("Logged out successfully");
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   // Toggle dropdown menu
