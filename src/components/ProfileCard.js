@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./ProfileCard.css";
 import gymImage from "../assets/cam.jpg"; // Or your default profile image
 
-const API_BASE_URL = "http://localhost:5000/api"; // Change if using a different port or domain
+const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const ProfileCard = () => {
   const [userInfo, setUserInfo] = useState(null);   // Will hold the user data from backend
