@@ -1,0 +1,111 @@
+/* Container for the trainer availability page */
+.availability-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    font-family: Arial, sans-serif;
+    color: black;
+  }
+  
+  /* Heading styles */
+  h2 {
+    color: black;
+    margin-bottom: 20px;
+  }
+  
+  /* Calendar styling */
+  .react-calendar {
+    width: 100%;
+    border: 1px solid #050606;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: rgb(209, 228, 247);
+    color: black;
+  }
+
+  /* Calendar navigation buttons and title */
+  .react-calendar__navigation button {
+    color: black !important;
+    font-weight: bold;
+  }
+  
+  .react-calendar__navigation span {
+    color: black !important;
+    font-weight: bold;
+  }
+  
+  /* Calendar week days */
+  .react-calendar__month-view__weekdays {
+    color: black !important;
+    font-weight: bold;
+  }
+  
+  .react-calendar__tile {
+    padding: 10px;
+    text-align: center;
+    border-radius: 6px;
+    transition: background 0.3s;
+    color: black;
+  }
+  
+  .react-calendar__tile:hover {
+    background: #007bff;
+    color: white;
+  }
+  
+  /* Highlight available days */
+  .available-day {
+    background: #007bff !important;
+    color: white !important;
+    border-radius: 6px;
+  }
+  
+  /* Update availability button */
+  .update-btn {
+    margin-top: 20px;
+    padding: 10px 15px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+  }
+  
+  .update-btn:hover {
+    background: #0056b3;
+  }
+  
+  /* Date, Time, Month, and Year display */
+  .date-time-container {
+    margin-top: 15px;
+    font-size: 18px;
+    color: black;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .date-time-container select {
+    padding: 5px;
+    font-size: 16px;
+    margin-top: 5px;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    cursor: pointer;
+    background: rgb(21, 21, 21);
+    color: black;
+  }
+  
+  .date-time-container span {
+    display: block;
+    margin-top: 5px;
+    font-size: 16px;
+    color: black;
+  }
