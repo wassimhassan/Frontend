@@ -1,0 +1,62 @@
+name: Full Stack CI/CD
+
+on:
+  push:
+    branches: [ main, dev ]  # Runs on push to main or dev
+  pull_request:
+    branches: [ main, dev ]  # Runs on pull requests to main or dev
+
+jobs:
+  frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3  # Pulls the latest code
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18  # Set Node.js version
+
+    - name: Install frontend dependencies
+      run: npm install
+      working-directory: ./Frontend  # Change if your frontend is in another folder
+
+    - name: Run Linter (Frontend)
+      run: npm run lint
+      working-directory: ./Frontend
+
+    - name: Run Tests (Frontend)
+      run: npm test
+      working-directory: ./Frontend
+
+    - name: Build Frontend
+      run: npm run build
+      working-directory: ./Frontend
+
+  backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install backend dependencies
+      run: npm install
+      working-directory: ./Backend  # Change if your backend is in another folder
+
+    - name: Run Linter (Backend)
+      run: npm run lint
+      working-directory: ./Backend
+
+    - name: Run Tests (Backend)
+      run: npm test
+      working-directory: ./Backend
