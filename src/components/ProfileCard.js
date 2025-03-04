@@ -26,7 +26,7 @@ const ProfileCard = () => {
     const formData = new FormData();
     formData.append("profilePicture", file);
 
-    const response = await fetch(`http://localhost:5000/api/auth/upload-profile-picture`, {
+    const response = await fetch(`https://backend-9w5ro7ei8-wassim-hassans-projects.vercel.app/api/auth/upload-profile-picture`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
