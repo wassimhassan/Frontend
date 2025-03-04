@@ -1,20 +1,22 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import WelcomePage from './components/WelcomePage';
+import SignUp from './components/SignUp';
+import Login from './components/Login';
 import ProfileCard from "./components/ProfileCard";
-import PtCard from "./components/PtCard";
-
-console.log("ProfileCard:", ProfileCard);
-console.log("PtCard:", PtCard);
+import ResetPassword from "./components/ResetPassword";
 
 function App() {
   return (
-    <div className="App">
+    <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/profile" replace />} />
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/signup" element={<  SignUp />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/profile" element={<ProfileCard />} />
-        <Route path="/ptcard" element={<PtCard />} />
       </Routes>
-    </div>
+    </Router>
   );
 }
 
