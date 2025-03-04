@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
-import io from "socket.io-client";
 import axios from "axios";
 import "./Chat.css";
-
-
-const socket = io("http://localhost:5000"); // Connect to backend WebSocket server
 
 const Chat = ({ clientId, trainerId }) => {
   const [messages, setMessages] = useState([]);
@@ -16,15 +12,6 @@ const Chat = ({ clientId, trainerId }) => {
       .get(`http://localhost:5000/api/chat/${clientId}/${trainerId}`)
       .then((response) => setMessages(response.data))
       .catch((error) => console.error("Error fetching chat history", error));
-
-    // Listen for real-time messages
-    socket.on("receiveMessage", (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
-    });
-
-    return () => {
-      socket.off("receiveMessage"); // Cleanup listener
-    };
   }, [clientId, trainerId]);
 
   const sendMessage = async () => {
@@ -38,7 +25,6 @@ const Chat = ({ clientId, trainerId }) => {
 
     try {
       await axios.post("http://localhost:5000/api/chat/send", messageData);
-      socket.emit("sendMessage", messageData); // Emit message to WebSocket
       setMessages((prevMessages) => [...prevMessages, messageData]);
       setNewMessage("");
     } catch (error) {

@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Login.css";
 
-const Login = () => {
+const Login = ({ setIsLoggingIn }) => {
+  useEffect(() => {
+    setIsLoggingIn(true); // Hide Navbar when user is on Login page
+    return () => setIsLoggingIn(false); // Show Navbar when user leaves
+  }, [setIsLoggingIn]);
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

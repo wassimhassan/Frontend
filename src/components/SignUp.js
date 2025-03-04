@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./SignUp.css";
 
-const SignUp = () => {
+const SignUp = ({ setIsSigningUp }) => {
+  useEffect(() => {
+    setIsSigningUp(true); // Hide navbar when user enters signup page
+    return () => setIsSigningUp(false); // Show navbar when user leaves signup page
+}, [setIsSigningUp]);
+
   const [step, setStep] = useState(1);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
