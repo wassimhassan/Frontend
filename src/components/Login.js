@@ -43,6 +43,7 @@ const Login = ({ setIsLoggingIn }) => {
       setForgotEmail(email);
     }
     
+    
     setLoading(false);
   };  
 
