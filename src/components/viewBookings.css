@@ -1,0 +1,56 @@
+.vb-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.vb-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.vb-loading, .vb-error, .vb-no-bookings {
+    font-size: 18px;
+    color: #333;
+}
+
+.vb-error {
+    color: red;
+}
+
+.vb-bookings-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
+
+.vb-booking-card {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: 280px;
+    text-align: center;
+}
+
+.vb-booking-card h3 {
+    margin-bottom: 8px;
+    color: #007bff;
+}
+
+.vb-cancel-btn {
+    background: #dc3545;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.vb-cancel-btn:hover {
+    background: #c82333;
+}

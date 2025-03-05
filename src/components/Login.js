@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Login.css";
 
-const Login = () => {
+const Login = ({ setIsLoggingIn }) => {
+  useEffect(() => {
+    setIsLoggingIn(true); // Hide Navbar when user is on Login page
+    return () => setIsLoggingIn(false); // Show Navbar when user leaves
+  }, [setIsLoggingIn]);
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -13,27 +18,33 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
+    setError(""); 
     setLoading(true);
+    
     try {
       const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
         email,
         password,
       });
-
+  
       if (response.status === 200) {
-        // Save token to localStorage
         localStorage.setItem("token", response.data.token);
-
-        // Redirect to profile page
-        window.location.href = "/profile"; // Change this to the correct route
+        localStorage.setItem("userId", response.data.user._id);
+        localStorage.setItem("role", response.data.user.role);  // Store role (client/trainer)
+  
+        if (response.data.user.role === "client") {
+          window.location.href = "/profile"; 
+        } else if (response.data.user.role === "trainer") {
+          window.location.href = "/availability"; 
+        }
       }
     } catch (error) {
       setError(error.response?.data?.message || "Login failed. Try again.");
       setForgotEmail(email);
     }
+    
     setLoading(false);
-  };
+  };  
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();

@@ -1,0 +1,62 @@
+.va-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+.va-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.va-loading, .va-error, .va-no-data {
+    text-align: center;
+    font-size: 18px;
+    color: #666;
+}
+
+.va-trainer-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.va-trainer-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.va-availability-list {
+    list-style: none;
+    padding: 0;
+}
+
+.va-slot {
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+.va-time {
+    background: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-left: 5px;
+        font-weight: bold;
+    }
+    
+    .available {
+        background-color: #4CAF50; /* Green */
+        color: white;
+    }
+    
+    .booked {
+        background-color: #ff4c4c; /* Red */
+        color: white;
+        text-decoration: line-through; /* Mark as booked */
+        cursor: not-allowed;
+    }
+    
