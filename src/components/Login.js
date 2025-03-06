@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Login.css";
 
-const Login = ({ setIsLoggingIn }) => {
+const Login = ({ setIsLoggingIn = () => {} }) => {
   useEffect(() => {
     setIsLoggingIn(true); // Hide Navbar when user is on Login page
     return () => setIsLoggingIn(false); // Show Navbar when user leaves
@@ -42,7 +42,6 @@ const Login = ({ setIsLoggingIn }) => {
       setError(error.response?.data?.message || "Login failed. Try again.");
       setForgotEmail(email);
     }
-    
     
     setLoading(false);
   };  

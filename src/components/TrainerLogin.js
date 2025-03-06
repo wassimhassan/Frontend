@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const TrainerLogin = ({ setTrainerId }) => {
+const TrainerLogin = ({ setTrainerId}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ const TrainerLogin = ({ setTrainerId }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/trainers/trainer/login", {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/trainers/trainer/login`, {
         email,
         password,
       });
@@ -18,22 +18,24 @@ const TrainerLogin = ({ setTrainerId }) => {
       const { token, trainer } = response.data;
 
       if (!trainer || !trainer.id) {
-        console.error("Invalid trainer data received from backend.");
+        console.error("❌ Invalid trainer data received from backend.");
         alert("Login failed. Please try again.");
         return;
       }
 
-      // Store Trainer ID & Token in Local Storage
+      // ✅ Store Trainer ID & Token in Local Storage
       localStorage.setItem("token", token);
       localStorage.setItem("trainerId", trainer.id);
       localStorage.setItem("role", "trainer");
 
-      console.log("Trainer logged in successfully. Trainer ID:", trainer.id);
+      console.log("✅ Trainer logged in successfully. Trainer ID:", trainer.id);
+      console.log("📌 Stored Token:", localStorage.getItem("token"));
+      console.log("📌 Stored Role:", localStorage.getItem("role"));
 
-      // Redirect to trainer dashboard
-      navigate("/profile");
+      // ✅ Force reloading to make sure role is applied
+      window.location.href = "/profile"; 
     } catch (error) {
-      console.error("Login failed:", error.response?.data || error.message);
+      console.error("❌ Login failed:", error.response?.data || error.message);
       alert("Invalid credentials. Please try again.");
     }
   };
@@ -68,4 +70,4 @@ const TrainerLogin = ({ setTrainerId }) => {
   );
 };
 
-export default TrainerLogin;
+export default TrainerLogin

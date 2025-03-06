@@ -4,26 +4,30 @@ import "./Navbar.css";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  
-  // ✅ Read user role & token from localStorage
-  const [userRole, setUserRole] = useState(localStorage.getItem("role"));
-  const token = localStorage.getItem("token");
 
-  // ✅ When the component mounts, check if the user is logged in
+  // ✅ Read user role & token from localStorage
+  const [userRole, setUserRole] = useState(localStorage.getItem("role") || "");
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
+
+  // ✅ Ensure role updates properly
   useEffect(() => {
-    if (!token) {
+    const storedRole = localStorage.getItem("role");
+    const storedToken = localStorage.getItem("token");
+
+    if (!storedToken) {
       navigate("/login");
     } else {
-      setUserRole(localStorage.getItem("role")); // Read role from localStorage
+      setUserRole(storedRole);
+      setToken(storedToken);
     }
-  }, [token, navigate]); // Re-run if token changes
+  }, []);
 
   // ✅ Logout function
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("userId");
+    localStorage.removeItem("trainerId");
     localStorage.removeItem("role");
-    setUserRole(""); // Reset role to guest
+    setUserRole("");
     navigate("/");
   };
 
@@ -52,7 +56,7 @@ const Navbar = () => {
         )}
       </ul>
 
-      {/* ✅ Logout Button for Logged-In Users */}
+      {/* ✅ Logout Button */}
       {token && (
         <button className="nb-logout-btn" onClick={handleLogout}>Logout</button>
       )}
