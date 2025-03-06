@@ -10,7 +10,7 @@ const TrainerLogin = ({ setTrainerId}) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/trainers/trainer/login`, {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/trainers/trainer-login`, {
         email,
         password,
       });
