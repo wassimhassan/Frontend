@@ -19,7 +19,7 @@ const ViewBookings = () => {
     setError("");
 
     try {
-      const response = await axios.get("http://localhost:5000/api/booking/bookings", {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/booking/bookings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -35,7 +35,7 @@ const ViewBookings = () => {
   // ✅ Cancel Booking
   const cancelBooking = async (bookingId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/booking/bookings/${bookingId}`, {
+      await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/api/booking/bookings/${bookingId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
