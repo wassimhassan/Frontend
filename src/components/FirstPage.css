@@ -1,0 +1,53 @@
+/* Main container */
+.FP-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Full viewport height */
+    background-image: url("../assets/gym.jpg"); /* Ensure the image is in the public folder */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 20px;
+}
+
+/* Title styling */
+.FP-title {
+    font-size: 1.8rem; /* Slightly larger title */
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #fff; /* White text for visibility */
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Shadow for better readability */
+}
+
+/* Button container */
+.FP-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px; /* Space between buttons */
+}
+
+/* Button styling */
+.FP-button {
+    width: 180px; /* Increased button size */
+    height: 50px; /* Increased height */
+    font-size: 1rem; /* Slightly bigger text */
+    font-weight: bold;
+    background-color: rgba(0, 123, 255, 0.9); /* Solid Blue */
+    color: #fff;
+    border: none;
+    border-radius: 8px; /* Slightly rounded corners */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-align: center;
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Button hover effect */
+.FP-button:hover {
+    background-color: rgba(0, 86, 179, 0.9); /* Darker blue */
+    transform: scale(1.05); /* Slight pop effect */
+}

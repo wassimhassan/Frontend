@@ -4,129 +4,187 @@ import "./bookingsPage.css";
 
 const BookingsPage = () => {
     const [trainers, setTrainers] = useState([]);
-    const [selectedTrainer, setSelectedTrainer] = useState(null);
     const [bookings, setBookings] = useState([]);
-    const [userRole, setUserRole] = useState(localStorage.getItem("role") || "");
+    const [selectedSession, setSelectedSession] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const token = localStorage.getItem("token");
+    const clientId = localStorage.getItem("userId");
 
     useEffect(() => {
-        if (userRole === "client") {
-            fetchTrainers();
-            fetchBookings();
-        }
-    }, [userRole]);
+        fetchTrainersWithAvailability();
+        fetchClientBookings();
+    }, []);
 
-    // ✅ Fetch available trainers
-    const fetchTrainers = async () => {
+    // ✅ Fetch all trainers with their availability
+    const fetchTrainersWithAvailability = async () => {
         try {
             const response = await axios.get("http://localhost:5000/api/trainers/trainers", {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setTrainers(response.data);
+
+            const trainersData = await Promise.all(
+                response.data.map(async (trainer) => {
+                    try {
+                        const availabilityResponse = await axios.get(
+                            `http://localhost:5000/api/trainers/availability/${trainer._id}`,
+                            { headers: { Authorization: `Bearer ${token}` } }
+                        );
+
+                        return {
+                            ...trainer,
+                            availability: availabilityResponse.data.map(slot => ({
+                                day: slot.day,
+                                time: slot.time.map(t => new Date(t)), // Convert time strings to Date objects
+                            })),
+                        };
+                    } catch (error) {
+                        console.error(`Error fetching availability for ${trainer.username}:`, error.response?.data || error.message);
+                        return { ...trainer, availability: [] };
+                    }
+                })
+            );
+
+            setTrainers(trainersData);
+            setLoading(false);
         } catch (error) {
             console.error("Error fetching trainers:", error);
+            setError("Failed to load trainers.");
+            setLoading(false);
         }
     };
 
     // ✅ Fetch client bookings
-    const fetchBookings = async () => {
+    const fetchClientBookings = async () => {
         try {
             const response = await axios.get("http://localhost:5000/api/booking/bookings", {
                 headers: { Authorization: `Bearer ${token}` },
             });
+
             setBookings(response.data);
         } catch (error) {
             console.error("Error fetching bookings:", error);
+            setError("Failed to load your bookings.");
         }
     };
 
-    // ✅ Fetch trainer availability when a trainer is selected
-    const fetchTrainerAvailability = async (trainerId) => {
-        try {
-            const response = await axios.get(`http://localhost:5000/api/trainers/availability/${trainerId}`);
-            setSelectedTrainer(prevTrainer => ({ ...prevTrainer, availability: response.data.availableSlots }));
-        } catch (error) {
-            console.error("Error fetching trainer availability:", error);
-        }
-    };    
+    // ✅ Check if a session is already booked
+    const isSessionBooked = (trainerId, sessionTime) => {
+        return bookings.some(
+            (booking) =>
+                booking.trainerId._id === trainerId &&
+                new Date(booking.sessionTime).getTime() === new Date(sessionTime).getTime()
+        );
+    };
 
-    // ✅ Handle trainer selection
-    const handleSelectTrainer = (trainer) => {
-        setSelectedTrainer(trainer);
-        fetchTrainerAvailability(trainer._id);
+    // ✅ Handle selecting a session (shows "Book" button)
+    const handleSelectSession = (trainerId, day, time) => {
+        if (isSessionBooked(trainerId, time)) return; // Prevent selecting booked slots
+        setSelectedSession({ trainerId, day, time });
     };
 
     // ✅ Handle session booking
-    const handleBookSession = async (trainerId, day, time) => {
-        if (!trainerId || !time) {
-            alert("Trainer ID and session time are required.");
+    const handleBookSession = async () => {
+        if (!selectedSession) {
+            alert("Please select a session before booking.");
             return;
         }
-    
+
+        const { trainerId, time } = selectedSession;
+
+        if (isSessionBooked(trainerId, time)) {
+            alert("⚠️ This session is already booked.");
+            return;
+        }
+
+        const confirmBooking = window.confirm(
+            `Are you sure you want to book a session with this trainer on ${time.toLocaleString()}?`
+        );
+
+        if (!confirmBooking) return;
+
         const requestData = {
             trainerId,
-            clientId: localStorage.getItem("userId"),
-            sessionTime: new Date(time).toISOString(), // Ensuring correct format
+            clientId,
+            sessionTime: new Date(time).toISOString(),
         };
-    
-        console.log("📌 Booking Session Request Data:", requestData); // Debugging log
-    
+
         try {
-            const response = await axios.post(
-                "http://localhost:5000/api/booking/book-session",
-                requestData,
-                {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-                }
-            );
-    
+            await axios.post("http://localhost:5000/api/booking/book-session", requestData, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
             alert("✅ Session booked successfully!");
-            fetchBookings(); // Refresh booked sessions
+            fetchClientBookings();
+            setSelectedSession(null); // Reset selection after booking
         } catch (error) {
-            console.error("❌ Error booking session:", error.response?.data || error.message);
+            console.error("Error booking session:", error.response?.data || error.message);
             alert(`⚠️ Booking failed: ${error.response?.data?.message || "Check request data."}`);
         }
     };
-    
 
     return (
         <div className="bp-bookings-page">
-            <h1 className="bp-page-title">Book Your Session</h1>
+            <h1 className="bp-page-title">Book Your Training Session</h1>
 
-            {userRole === "client" && (
-                <div className="bp-trainers-list">
-                    {trainers.map((trainer) => (
+            {/* ✅ Trainer List */}
+            <div className="bp-trainers-list">
+                {loading ? (
+                    <p>Loading trainers...</p>
+                ) : error ? (
+                    <p className="bp-error">{error}</p>
+                ) : (
+                    trainers.map((trainer) => (
                         <div key={trainer._id} className="bp-trainer-card">
                             <h3>{trainer.username}</h3>
                             <p>Specialties: {trainer.specialties.join(", ")}</p>
-                            <button onClick={() => handleSelectTrainer(trainer)}>View Availability</button>
-                        </div>
-                    ))}
-                </div>
-            )}
 
-            {selectedTrainer && (
-                <div className="bp-selected-trainer">
-                    <h2>Availability for {selectedTrainer.username}</h2>
-                    {selectedTrainer.availability ? (
-                        <div className="bp-availability-list">
-                            {selectedTrainer.availability.map((slot, index) => (
-                                <div key={index} className="bp-availability-item">
-                                    <strong>{slot.day}:</strong>
-                                    {slot.time.map((time, i) => (
-                                        <button key={i} onClick={() => handleBookSession(selectedTrainer._id, slot.day, time)}>
-                                        {new Date(time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                                    </button>                                    
+                            {trainer.availability.length > 0 ? (
+                                <div className="bp-availability-list">
+                                    {trainer.availability.map((slot, index) => (
+                                        <div key={index} className="bp-availability-item">
+                                            <strong>{slot.day}:</strong>
+                                            {slot.time.length > 0 ? (
+                                                slot.time.map((time, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => handleSelectSession(trainer._id, slot.day, time)}
+                                                        className={`bp-availability-button ${isSessionBooked(trainer._id, time) ? "bp-booked" : ""}`}
+                                                        disabled={isSessionBooked(trainer._id, time)}
+                                                    >
+                                                        {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                                        {isSessionBooked(trainer._id, time) && " (Booked)"}
+                                                    </button>
+                                                ))
+                                            ) : (
+                                                <p>No available slots</p>
+                                            )}
+                                        </div>
                                     ))}
                                 </div>
-                            ))}
+                            ) : (
+                                <p>No available slots</p>
+                            )}
                         </div>
-                    ) : (
-                        <p>Loading availability...</p>
-                    )}
+                    ))
+                )}
+            </div>
+
+            {/* ✅ Book Button (Appears after selecting a session) */}
+            {selectedSession && (
+                <div className="bp-confirm-booking">
+                    <h3>Selected Session:</h3>
+                    <p>
+                        Trainer ID: {selectedSession.trainerId} <br />
+                        Time: {selectedSession.time.toLocaleString()}
+                    </p>
+                    <button className="bp-book-button" onClick={handleBookSession}>
+                        Confirm Booking
+                    </button>
                 </div>
             )}
 
+            {/* ✅ Bookings List */}
             <div className="bp-bookings-list">
                 <h2>Your Bookings</h2>
                 {bookings.length === 0 ? (
@@ -135,7 +193,7 @@ const BookingsPage = () => {
                     <ul>
                         {bookings.map((booking) => (
                             <li key={booking._id}>
-                                {booking.trainerId.username} - {new Date(booking.sessionTime).toLocaleString()}
+                                <strong>{booking.trainerId.username}</strong> - {new Date(booking.sessionTime).toLocaleString()}
                             </li>
                         ))}
                     </ul>
