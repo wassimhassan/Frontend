@@ -19,7 +19,7 @@ const BookingsPage = () => {
     // ✅ Fetch all trainers with their availability
     const fetchTrainersWithAvailability = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/trainers/trainers", {
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/trainers/trainers`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -27,7 +27,7 @@ const BookingsPage = () => {
                 response.data.map(async (trainer) => {
                     try {
                         const availabilityResponse = await axios.get(
-                            `http://localhost:5000/api/trainers/availability/${trainer._id}`,
+                            `${process.env.REACT_APP_BACKEND_URL}/api/trainers/availability/${trainer._id}`,
                             { headers: { Authorization: `Bearer ${token}` } }
                         );
 
@@ -57,7 +57,7 @@ const BookingsPage = () => {
     // ✅ Fetch client bookings
     const fetchClientBookings = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/booking/bookings", {
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/booking/bookings`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -110,7 +110,7 @@ const BookingsPage = () => {
         };
 
         try {
-            await axios.post("http://localhost:5000/api/booking/book-session", requestData, {
+            await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/booking/book-session`, requestData, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 

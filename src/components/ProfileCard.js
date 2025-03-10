@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./ProfileCard.css";
 import gymImage from "../assets/cam.jpg"; // Or your default profile image
 
-const API_BASE_URL = "http://localhost:5000/api"; // Change if using a different port or domain
+const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const ProfileCard = () => {
   const [userInfo, setUserInfo] = useState(null);   // Will hold the user data from backend
@@ -26,7 +26,7 @@ const ProfileCard = () => {
     const formData = new FormData();
     formData.append("profilePicture", file);
 
-    const response = await fetch(`http://localhost:5000/api/auth/upload-profile-picture`, {
+    const response = await fetch(`${API_BASE_URL}/auth/upload-profile-picture`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -198,7 +198,7 @@ const ProfileCard = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     alert("Logged out successfully");
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   // Toggle dropdown menu

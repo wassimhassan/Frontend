@@ -26,7 +26,7 @@ const ViewAvailability = () => {
         try {
             console.log("📌 Fetching availability for Trainer ID:", id);
 
-            const response = await axios.get(`http://localhost:5000/api/trainers/availability/${id}`, {
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/trainers/availability/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
