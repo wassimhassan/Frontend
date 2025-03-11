@@ -1,0 +1,55 @@
+/* GymOwnerLogin.css */
+.login-container {
+    width: 350px;
+    margin: 100px auto;
+    padding: 30px;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+}
+
+input:focus {
+    border-color: #007bff;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: 0.3s ease-in-out;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 10px;
+}

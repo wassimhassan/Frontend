@@ -1,9 +1,9 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; // For navigation
-import "./FirstPage.css"; // Import the CSS file
+import { useNavigate } from "react-router-dom"; 
+import "./FirstPage.css"; 
 
 const FirstPage = () => {
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate(); 
 
   return (
     <div className="FP-container">
@@ -11,15 +11,21 @@ const FirstPage = () => {
       <div className="FP-button-container">
         <button
           className="FP-button"
-          onClick={() => navigate("/trainer-login")} // Navigate to TrainerLogin
+          onClick={() => navigate("/trainer-login")} 
         >
           Personal Trainer
         </button>
         <button
           className="FP-button"
-          onClick={() => navigate("/WelcomePage")} // Navigate to Client
+          onClick={() => navigate("/WelcomePage")} 
         >
           Client
+        </button>
+        <button
+          className="FP-button"
+          onClick={() => navigate("/gym-owner-login")} 
+        >
+          Gym Owner
         </button>
       </div>
     </div>

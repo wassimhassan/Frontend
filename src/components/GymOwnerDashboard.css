@@ -1,0 +1,244 @@
+/* General Page Styling */
+.dashboard-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    border-radius: 10px;
+}
+
+/* Dashboard Title */
+.dashboard-title {
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Section Titles */
+.section-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 15px;
+}
+
+/* Card Styling */
+.dashboard-card {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+/* Tables */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dashboard-table th, .dashboard-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.dashboard-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Buttons */
+.action-button {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-right: 5px;
+    transition: background 0.3s ease-in-out;
+}
+
+.add-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.add-button:hover {
+    background-color: #218838;
+}
+
+.remove-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.remove-button:hover {
+    background-color: #c82333;
+}
+
+/* Subscription Status */
+.status-active {
+    color: green;
+    font-weight: bold;
+}
+
+.status-expired {
+    color: red;
+    font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-table th, .dashboard-table td {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .dashboard-title {
+        font-size: 22px;
+    }
+
+    .section-title {
+        font-size: 18px;
+    }
+}
+.dashboard-container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  h2 {
+    font-size: 20px;
+    margin-top: 20px;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  button {
+    cursor: pointer;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    transition: 0.3s;
+  }
+  
+  .remove-btn {
+    background-color: red;
+    color: white;
+  }
+  
+  .cancel-btn {
+    background-color: orange;
+    color: white;
+  }
+  
+  .delete-btn {
+    background-color: darkred;
+    color: white;
+  }
+  
+  button:hover {
+    opacity: 0.8;
+  }
+  
+  .dashboard-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #007bff;
+    padding: 15px 20px;
+    color: white;
+  }
+  
+  .navbar-links {
+    display: flex;
+    gap: 15px;
+    list-style: none;
+  }
+  
+  .navbar-links a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .navbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .logout-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .chart-container {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    text-align: center;
+  }
+  
+  .activity-list {
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
