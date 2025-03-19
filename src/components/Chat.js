@@ -1,6 +1,4 @@
-// src/components/Chat.js
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom"; // to get the :otherUserId param
 import axios from "axios";
 import { io } from "socket.io-client";
 import "./Chat.css";
@@ -13,11 +11,6 @@ const Chat = ({ clientId, trainerId }) => {
   const [typing, setTyping] = useState(false);
   const chatEndRef = useRef(null);
 
-  // Get logged-in user data from localStorage (should be set after login)
-  const token = localStorage.getItem("token");
-  const currentUserId = localStorage.getItem("userId"); // directly get userId
-
-  // Fetch chat history if both IDs are available
   useEffect(() => {
     socket.connect();
     socket.emit("joinRoom", { clientId, trainerId });
@@ -49,13 +42,12 @@ const Chat = ({ clientId, trainerId }) => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Send a new message
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
     const messageData = {
-      sender: currentUserId,
-      receiver: otherUserId,
+      sender: clientId,
+      receiver: trainerId,
       text: newMessage,
       timestamp: new Date().toISOString(),
     };
@@ -66,7 +58,7 @@ const Chat = ({ clientId, trainerId }) => {
       setMessages((prevMessages) => [...prevMessages, messageData]);
       setNewMessage("");
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error sending message", error);
     }
   };
 
@@ -109,4 +101,3 @@ const Chat = ({ clientId, trainerId }) => {
 };
 
 export default Chat;
-
