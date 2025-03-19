@@ -125,7 +125,7 @@ const ProfileCard = () => {
         alert("Profile picture removed successfully!");
         setUserInfo((prevUserInfo) => ({
           ...prevUserInfo,
-          profilePicture: "/uploads/cam.jpg", // Reset to default
+          profilePicture: "https://your-s3-bucket.s3.eu-north-1.amazonaws.com/default.jpg"
         }));
       } else {
         alert(data.message || "Failed to delete profile picture");
@@ -239,7 +239,7 @@ const ProfileCard = () => {
       <div className="profile-img-wrapper" onClick={toggleDropdown}>
         {/* If the user has a profilePicture field, display it; otherwise fallback */}
         <img
-          src={userInfo.profilePicture ? `http://localhost:5000${userInfo.profilePicture}` : gymImage}
+          src={userInfo.profilePicture ? userInfo.profilePicture : gymImage}
           alt="Profile"
           className="profile-img"
         />
@@ -276,7 +276,7 @@ const ProfileCard = () => {
           <div className="image-modal">
             <div className="modal-content">
               <span className="close-modal" onClick={closeImageModal}>&times;</span>
-              <img src={userInfo?.profilePicture ? `http://localhost:5000${userInfo.profilePicture}` : gymImage} alt="Profile" />
+              <img src={userInfo.profilePicture ? userInfo.profilePicture : gymImage} alt="Profile" />
             </div>
           </div>
         )}
