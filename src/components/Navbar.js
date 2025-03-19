@@ -20,7 +20,7 @@ const Navbar = () => {
       setUserRole(storedRole);
       setToken(storedToken);
     }
-  }, []);
+  }, [navigate]);
 
   // ✅ Logout function
   const handleLogout = () => {
@@ -42,6 +42,8 @@ const Navbar = () => {
             <li><Link to="/profile" className="nb-nav-link">Profile</Link></li>
             <li><Link to="/booking" className="nb-nav-link">Book a Session</Link></li>
             <li><Link to="/view-bookings" className="nb-nav-link">View Bookings</Link></li>
+            <li><Link to="/payments" className="nb-nav-link">Payments</Link></li>
+            <li><Link to="/subscribe" className="nb-nav-link">Subscribe</Link></li> {/* Added Subscription Page */}
             <li><Link to="/chat" className="nb-nav-link">Chat</Link></li>
             <li><Link to="/workout-plan" className="nb-nav-link">Workout-Plan</Link></li>
           </>
@@ -56,6 +58,16 @@ const Navbar = () => {
             <li><Link to="/assign-workout" className="nb-nav-link">Assign Workout</Link></li>
           </>
         )}
+
+{userRole === "gymOwner" && (
+  <>
+    <li><Link to="/gym-owner/dashboard" className="nb-nav-link">Dashboard</Link></li>
+    <li><Link to="/gym-owner/subscriptions" className="nb-nav-link">Manage Subscriptions</Link></li> 
+    <li><Link to="/gym-owner/payments" className="nb-nav-link">Manage Payments</Link></li> 
+    <li><Link to="/gym-owner/unpaid-clients" className="nb-nav-link">Unpaid Clients</Link></li>
+  </>
+)}
+
       </ul>
 
       {/* ✅ Logout Button */}
