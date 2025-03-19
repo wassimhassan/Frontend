@@ -16,34 +16,28 @@ const GymOwnerLogin = () => {
     setLoading(true);
 
     try {
-      const response = axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/gym-owner/login`, { phoneNumber, pin })
-      .then((response) => {
-        console.log("Gym Owner Login Successful:", response.data);
-    
-        // ✅ Save token and role
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("role", "gymOwner");
-    
-        console.log("🔍 Role in Local Storage:", localStorage.getItem("role")); // ✅ Debugging step
-        console.log("🔍 Token in Local Storage:", localStorage.getItem("token"));
-    
-        // ✅ Navigate to Dashboard
-        navigate("/gym-owner/dashboard");
-      })
-      .catch((error) => {
-        console.error("Gym Owner Login Failed:", error.response?.data?.message || error.message);
-      });
-    
-    
+      const response = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/api/gym-owner/login`,
+        { phoneNumber, pin }
+      );
 
-      // ✅ Store token and role in localStorage
+      console.log("Gym Owner Login Successful:", response.data);
+
+      // ✅ Save token and role in localStorage BEFORE navigating
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("role", "gymOwner");
 
-      setLoading(false);
-      navigate("/gym-owner/dashboard"); // Redirect to Gym Owner Dashboard
+      console.log("🔍 Role in Local Storage:", localStorage.getItem("role")); // ✅ Debugging step
+      console.log("🔍 Token in Local Storage:", localStorage.getItem("token"));
+
+      // ✅ Delay navigation slightly to ensure localStorage is updated
+      setTimeout(() => {
+        navigate("/gym-owner/dashboard");
+      }, 100);
     } catch (err) {
+      console.error("Gym Owner Login Failed:", err.response?.data?.message || err.message);
       setError(err.response?.data?.message || "Login failed. Try again.");
+    } finally {
       setLoading(false);
     }
   };

@@ -22,7 +22,6 @@ const FirstPage = () => {
           Client
         </button>
         <button
-          style={styles.button}
           onClick={() => navigate("/gym-owner-login")} // Navigate to Gym Owner Login
         >
           Gym Owner
