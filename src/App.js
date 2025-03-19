@@ -55,7 +55,11 @@ function App() {
 
   return (
     <Router>
-      <MainContent trainerId={trainerId} setTrainerId={setTrainerId} userRole={userRole} />
+      <MainContent
+        trainerId={trainerId}
+        setTrainerId={setTrainerId}
+        userRole={userRole}
+      />
     </Router>
   );
 }
