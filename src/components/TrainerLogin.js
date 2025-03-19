@@ -70,4 +70,4 @@ const TrainerLogin = ({ setTrainerId}) => {
   );
 };
 
-export default TrainerLogin
+export default TrainerLogin;

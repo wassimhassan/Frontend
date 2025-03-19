@@ -33,7 +33,7 @@ const TrainerAvailability = ({ trainerId }) => {
       console.log("Making request to fetch availability for Trainer ID:", id);
 
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/api/trainers/availability/${id}`,
+        `http://localhost:5000/api/trainers/availability/${id}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -89,7 +89,7 @@ const TrainerAvailability = ({ trainerId }) => {
       }
 
       const response = await axios.put(
-        `${process.env.REACT_APP_BACKEND_URL}/api/trainers/availability`,
+        `http://localhost:5000/api/trainers/availability`,
         {
           trainerId,
           availableSlots: updatedSlots,
@@ -142,7 +142,7 @@ const TrainerAvailability = ({ trainerId }) => {
       }
   
       await axios.put(
-        `${process.env.REACT_APP_BACKEND_URL}/api/trainers/availability`,
+        `http://localhost:5000/api/trainers/availability`,
         {
           trainerId,
           availableSlots: updatedSlots,
@@ -199,7 +199,7 @@ const TrainerAvailability = ({ trainerId }) => {
 
       // Send updated availability to the backend
       const response = await axios.put(
-        `${process.env.REACT_APP_BACKEND_URL}/api/trainers/availability`,
+        `http://localhost:5000/api/trainers/availability`,
         {
           trainerId,
           availableSlots: updatedSlots,
@@ -308,3 +308,4 @@ const TrainerAvailability = ({ trainerId }) => {
 };
 
 export default TrainerAvailability;
+
