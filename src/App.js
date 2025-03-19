@@ -9,6 +9,7 @@ import TrainerLogin from "./components/TrainerLogin";
 import Navbar from "./components/Navbar";
 import ProfileCard from "./components/ProfileCard";
 import PTCard from "./components/PtCard";
+import PTCard from "./components/PtCard";
 import ResetPassword from "./components/ResetPassword";
 import WelcomePage from "./components/WelcomePage";
 import WorkoutPlan from "./components/WorkoutPlan";
@@ -55,7 +56,11 @@ function App() {
 
   return (
     <Router>
-      <MainContent trainerId={trainerId} setTrainerId={setTrainerId} userRole={userRole} />
+      <MainContent
+        trainerId={trainerId}
+        setTrainerId={setTrainerId}
+        userRole={userRole}
+      />
     </Router>
   );
 }
