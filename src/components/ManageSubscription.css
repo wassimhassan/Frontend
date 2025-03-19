@@ -1,0 +1,57 @@
+/* SubscriptionManagement.css */
+.subscription-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .subscription-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .subscription-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .subscription-table th, .subscription-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .subscription-table th {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .status-active {
+    color: green;
+    font-weight: bold;
+  }
+  
+  .status-expired {
+    color: red;
+    font-weight: bold;
+  }
+  
+  .cancel-btn {
+    background-color: red;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .renew-btn {
+    background-color: green;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
