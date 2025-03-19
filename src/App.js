@@ -11,22 +11,40 @@ import ProfileCard from "./components/ProfileCard";
 import PTCard from './components/PtCard';
 import ResetPassword from "./components/ResetPassword";
 import WelcomePage from './components/WelcomePage';
+import WorkoutPlan from './components/WorkoutPlan';
+import AssignWorkout from './components/AssignWorkout';
+import TrainerDashboard from './components/TrainerDashboard';
+import ClientDashboard from './components/ClientDashboard';
 import BookingsPage from './components/BookingsPage';
 import ViewBookings from './components/ViewBookings';  // View booked sessions
 import ViewAvailability from './components/ViewAvailability'; // Trainer availability list
 
 function App() {
   const [trainerId, setTrainerId] = useState(localStorage.getItem("trainerId") || null);
-  const [userRole, setUserRole] = useState(localStorage.getItem("role") || null); // Retrieve role from localStorage
+  const [userRole, setUserRole] = useState(localStorage.getItem("role") || null);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (!token) {
-      setUserRole(null); // No access without login
-    } else {
-      setUserRole(localStorage.getItem("role"));
-    }
-  }, [token]);
+    const updateUserRole = () => {
+      const storedRole = localStorage.getItem("role");
+      const storedToken = localStorage.getItem("token");
+  
+      if (!storedToken) {
+        setUserRole(null);
+      } else {
+        setUserRole(storedRole);
+      }
+    };
+  
+    updateUserRole(); // Run immediately
+  
+    window.addEventListener("storage", updateUserRole); // Listen for storage changes
+  
+    return () => {
+      window.removeEventListener("storage", updateUserRole);
+    };
+  }, []);
+  
 
   return (
     <Router>
@@ -38,7 +56,7 @@ function App() {
 // 🔹 Redirect to login if not authenticated
 const ProtectedRoute = ({ element, userRole }) => {
   const token = localStorage.getItem("token");
-  return token && userRole ? element : <Navigate to="/" />;
+  return token ? element : <Navigate to="/login" />;
 };
 
 function MainContent({ trainerId, setTrainerId, userRole }) {
@@ -61,13 +79,10 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
         <Route path="/login" element={<Login setIsLoggingIn={setIsLoggingIn} />} />
         <Route path="/trainer-login" element={<TrainerLogin setTrainerId={setTrainerId} />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        {/* PROFILE Route based on User Role */}
-        {userRole === "client" && (
-          <Route path="/profile" element={<ProtectedRoute element={<ProfileCard />} userRole={userRole} />} />
-        )}
-        {userRole === "trainer" && (
-          <Route path="/profile" element={<ProtectedRoute element={<PTCard />} userRole={userRole} />} />
-        )}
+
+        {/* Profile Route based on User Role */}
+        {userRole === "client" && <Route path="/profile" element={<ProtectedRoute element={<ProfileCard />} userRole={userRole} />} />}
+        {userRole === "trainer" && <Route path="/profile" element={<ProtectedRoute element={<PTCard />} userRole={userRole} />} />}
 
         {/* CLIENT Routes */}
         {userRole === "client" && (
@@ -75,6 +90,7 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
             <Route path="/chat" element={<ProtectedRoute element={<Chat />} userRole={userRole} />} />
             <Route path="/booking" element={<ProtectedRoute element={<BookingsPage />} userRole={userRole} />} />
             <Route path="/view-bookings" element={<ProtectedRoute element={<ViewBookings />} userRole={userRole} />} />
+            <Route path="/client-dashboard" element={<ProtectedRoute element={<ClientDashboard />} userRole={userRole} />} />
           </>
         )}
 
@@ -84,6 +100,9 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
             <Route path="/chat" element={<ProtectedRoute element={<Chat />} userRole={userRole} />} />
             <Route path="/availability" element={<ProtectedRoute element={<Availability trainerId={trainerId} />} userRole={userRole} />} />
             <Route path="/view-availability" element={<ProtectedRoute element={<ViewAvailability />} userRole={userRole} />} />
+            <Route path="/trainer-dashboard" element={<ProtectedRoute element={<TrainerDashboard />} userRole={userRole} />} />
+            <Route path="/workout-plan" element={<ProtectedRoute element={<WorkoutPlan />} userRole={userRole} />} />
+            <Route path="/assign-workout" element={<ProtectedRoute element={<AssignWorkout />} userRole={userRole} />} />
           </>
         )}
 

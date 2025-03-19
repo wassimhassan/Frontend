@@ -4,7 +4,7 @@ import "./Navbar.css";
 
 const Navbar = () => {
   const navigate = useNavigate();
-
+  
   // ✅ Read user role & token from localStorage
   const [userRole, setUserRole] = useState(localStorage.getItem("role") || "");
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -43,6 +43,7 @@ const Navbar = () => {
             <li><Link to="/booking" className="nb-nav-link">Book a Session</Link></li>
             <li><Link to="/view-bookings" className="nb-nav-link">View Bookings</Link></li>
             <li><Link to="/chat" className="nb-nav-link">Chat</Link></li>
+            <li><Link to="/workout-plan" className="nb-nav-link">Workout-Plan</Link></li>
           </>
         )}
 
@@ -52,6 +53,7 @@ const Navbar = () => {
             <li><Link to="/availability" className="nb-nav-link">Manage Availability</Link></li>
             <li><Link to="/view-availability" className="nb-nav-link">View Availability</Link></li>
             <li><Link to="/chat" className="nb-nav-link">Chat</Link></li>
+            <li><Link to="/assign-workout" className="nb-nav-link">Assign Workout</Link></li>
           </>
         )}
       </ul>

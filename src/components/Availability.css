@@ -1,138 +1,253 @@
-/* Container for the trainer availability page */
+/* General container styling */
 .availability-container {
-    max-width: 500px;
-    margin: 40px auto;
-    padding: 20px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    font-family: Arial, sans-serif;
-    color: black;
-  }
-  
-  /* Heading styles */
-  h2 {
-    color: black;
-    margin-bottom: 20px;
-  }
-  
-  /* Calendar styling */
-  .react-calendar {
-    width: 100%;
-    border: 1px solid #050606;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    background: rgb(209, 228, 247);
-    color: black;
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+}
+
+/* Heading styles */
+h2 {
+  color: #222;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Calendar Styling */
+.react-calendar {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  background: #f0f6ff;
+  color: #222;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Calendar navigation buttons */
+.react-calendar__navigation button {
+  color: #007bff !important;
+  font-weight: 600;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 8px;
+  transition: 0.3s;
+}
+
+.react-calendar__navigation button:hover {
+  background: #e0eaff;
+  border-radius: 6px;
+}
+
+/* Calendar weekdays */
+.react-calendar__month-view__weekdays {
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #444;
+}
+
+/* Calendar tiles (days) */
+.react-calendar__tile {
+  padding: 12px;
+  text-align: center;
+  border-radius: 8px;
+  transition: background 0.3s ease-in-out;
+  color: #222;
+  cursor: pointer;
+}
+
+/* Default Hover Effect */
+.react-calendar__tile:hover {
+  background: #007bff;
+  color: white;
+}
+
+/* Fix the yellow highlight issue */
+.react-calendar__tile--active {
+  background: #007bff !important;
+  color: white !important;
+  font-weight: bold;
+}
+
+/* Highlight available days */
+.available-day {
+  background: #007bff !important;
+  color: white !important;
+  font-weight: bold;
+  border-radius: 6px;
+}
+
+/* Time Selection */
+.time-selection {
+  margin-top: 15px;
+  font-size: 18px;
+  color: #222;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.time-selection label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.time-selection input {
+  padding: 8px;
+  font-size: 16px;
+  margin-top: 5px;
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  cursor: pointer;
+  background: white;
+  color: #333;
+}
+
+/* Buttons */
+.update-btn {
+  margin-top: 20px;
+  padding: 12px 18px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background 0.3s ease-in-out;
+  width: 100%;
+}
+
+.update-btn:hover {
+  background: #0056b3;
+}
+
+/* Delete and Edit Buttons */
+.delete-btn, .edit-btn {
+  padding: 6px 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+  transition: 0.3s;
+  margin-left: 5px;
+}
+
+.delete-btn {
+  background: #ff4d4d;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #cc0000;
+}
+
+.edit-btn {
+  background: #ffcc00;
+  color: black;
+}
+
+.edit-btn:hover {
+  background: #d4a200;
+}
+
+/* Availability List */
+.availability-list {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.availability-list h3 {
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+.availability-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.availability-list li {
+  margin: 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+/* Edit Form Styling */
+.edit-form {
+  margin-top: 20px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+}
+
+.edit-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #444;
+}
+
+.edit-form input {
+  padding: 8px;
+  font-size: 1rem;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+/* Save and Cancel Buttons */
+.edit-form button {
+  margin-right: 10px;
+  padding: 8px 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: 600;
+  border: none;
+  transition: 0.3s;
+}
+
+.edit-form button:first-child {
+  background: #007bff;
+  color: white;
+}
+
+.edit-form button:first-child:hover {
+  background: #0056b3;
+}
+
+.edit-form button:last-child {
+  background: #ff4d4d;
+  color: white;
+}
+
+.edit-form button:last-child:hover {
+  background: #cc0000;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  .availability-container {
+      width: 90%;
+      padding: 15px;
   }
 
-  /* Calendar navigation buttons and title */
-  .react-calendar__navigation button {
-    color: black !important;
-    font-weight: bold;
-  }
-  
-  .react-calendar__navigation span {
-    color: black !important;
-    font-weight: bold;
-  }
-  
-  /* Calendar week days */
-  .react-calendar__month-view__weekdays {
-    color: black !important;
-    font-weight: bold;
-  }
-  
-  .react-calendar__tile {
-    padding: 10px;
-    text-align: center;
-    border-radius: 6px;
-    transition: background 0.3s;
-    color: black;
-  }
-  
-  .react-calendar__tile:hover {
-    background: #007bff;
-    color: white;
-  }
-  
-  /* Highlight available days */
-  .available-day {
-    background: #007bff !important;
-    color: white !important;
-    border-radius: 6px;
-  }
-  
-  /* Update availability button */
   .update-btn {
-    margin-top: 20px;
-    padding: 10px 15px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background 0.3s;
+      font-size: 14px;
+      padding: 10px;
   }
-  
-  .update-btn:hover {
-    background: #0056b3;
-  }
-  
-  /* Date, Time, Month, and Year display */
-  .date-time-container {
-    margin-top: 15px;
-    font-size: 18px;
-    color: black;
-    font-weight: bold;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .date-time-container select {
-    padding: 5px;
-    font-size: 16px;
-    margin-top: 5px;
-    border: 1px solid #007bff;
-    border-radius: 5px;
-    cursor: pointer;
-    background: rgb(21, 21, 21);
-    color: black;
-  }
-  
-  .date-time-container span {
-    display: block;
-    margin-top: 5px;
-    font-size: 16px;
-    color: black;
-  }
-
-  .edit-form {
-    margin-top: 20px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-  }
-  
-  .edit-form label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-  
-  .edit-form input {
-    padding: 5px;
-    font-size: 1rem;
-    margin-bottom: 10px;
-  }
-  
-  .edit-form button {
-    margin-right: 10px;
-    padding: 5px 10px;
-    font-size: 1rem;
-    cursor: pointer;
-  }
+}

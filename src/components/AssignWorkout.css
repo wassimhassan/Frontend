@@ -1,0 +1,65 @@
+.assign-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  h2 {
+    color: #333;
+    margin-bottom: 15px;
+  }
+  
+  .input-field {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .exercise-list {
+    margin-top: 15px;
+  }
+  
+  .exercise-card {
+    background: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 5px 0;
+  }
+  
+  .add-btn {
+    background: #28a745;
+    color: white;
+  }
+  
+  .remove-btn {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .submit-btn {
+    background: #007bff;
+    color: white;
+  }
+  
+  .message {
+    margin-top: 10px;
+    font-weight: bold;
+    color: green;
+  }
+  
