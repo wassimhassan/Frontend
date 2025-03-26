@@ -6,6 +6,7 @@
     "@stripe/react-stripe-js": "^3.4.0",
     "@stripe/stripe-js": "^6.1.0",
     "axios": "^1.7.9",
+    "cmps271": "file:../Frontend",
     "cra-template": "1.2.0",
     "react": "^19.0.0",
     "react-calendar": "^5.1.0",

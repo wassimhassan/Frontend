@@ -1,74 +1,103 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./Availability.css";
+import { useNavigate } from "react-router-dom";
 
-const TrainerAvailability = ({ trainerId }) => {
-  const [availability, setAvailability] = useState([]); // Stores the trainer's availability slots
-  const [selectedDate, setSelectedDate] = useState(new Date()); // Selected date from the calendar
-  const [selectedTime, setSelectedTime] = useState(""); // Selected time from the input
-  const [loading, setLoading] = useState(false); // Loading state for API calls
-  const [editingSlot, setEditingSlot] = useState(null); // Track the time slot being edited
-  const [updatedTime, setUpdatedTime] = useState(""); // Track the updated time for the slot
+const TrainerAvailability = () => {
+  const [availability, setAvailability] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedTime, setSelectedTime] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [editingSlot, setEditingSlot] = useState(null);
+  const [updatedTime, setUpdatedTime] = useState("");
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const storedTrainerId = localStorage.getItem("trainerId");
-
-    if (!storedTrainerId) {
-      console.error("Trainer ID is missing in localStorage!");
-      alert("Trainer ID is missing. Please log in again.");
-      return;
+  // Format time for display
+  const formatTimeDisplay = (timeString) => {
+    try {
+      return new Date(timeString).toLocaleTimeString([], { 
+        hour: "2-digit", 
+        minute: "2-digit",
+        hour12: true
+      });
+    } catch (e) {
+      console.error("Error formatting time:", e);
+      return timeString;
     }
+  };
 
-    console.log("Fetching availability for Trainer ID:", storedTrainerId);
-
-    fetchAvailability(storedTrainerId);
-  }, []);
-
-  // Fetch the trainer's availability from the backend
-  const fetchAvailability = async (id) => {
+  // Fetch the trainer's availability from the backend - moved to a useCallback
+  const fetchAvailability = useCallback(async (id, token) => {
     setLoading(true);
+    setError(null);
     try {
       console.log("Making request to fetch availability for Trainer ID:", id);
 
       const response = await axios.get(
         `http://localhost:5000/api/trainers/availability/${id}`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      if (!response.data || response.data.length === 0) {
+      if (!response.data) {
         console.warn("No availability data found.");
         setAvailability([]);
       } else {
         setAvailability(response.data);
       }
     } catch (error) {
-      console.error("Error fetching availability:", error.response?.data || error.message);
-      alert("Failed to fetch availability. Check if trainer exists.");
-      setAvailability([]);
+      if (error.response?.status === 404) {
+        console.log("No availability data found for this trainer yet.");
+        setAvailability([]);
+      } else {
+        console.error("Error fetching availability:", error.response?.data || error.message);
+        setError("Failed to fetch availability. Please check your connection and try again.");
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Check auth and load data on component mount
+  useEffect(() => {
+    const storedTrainerId = localStorage.getItem("trainerId");
+    const token = localStorage.getItem("token");
+
+    if (!storedTrainerId || !token) {
+      console.error("Trainer ID or token is missing in localStorage!");
+      setError("Authentication information is missing. Please log in again.");
+      setLoading(false);
+      setTimeout(() => {
+        navigate("/login"); // Redirect to login after showing the error
+      }, 3000);
+      return;
+    }
+
+    fetchAvailability(storedTrainerId, token);
+  }, [fetchAvailability, navigate]);
 
   // Add a new time slot or update existing slots
   const updateAvailability = async () => {
     if (!selectedTime) {
-      alert("Please select a time before setting availability.");
+      setError("Please select a time before setting availability.");
       return;
     }
 
-    const trainerId = localStorage.getItem("trainerId"); // Get Trainer ID from storage
+    const trainerId = localStorage.getItem("trainerId");
+    const token = localStorage.getItem("token");
 
-    if (!trainerId) {
-      alert("Trainer ID is missing. Please log in again.");
+    if (!trainerId || !token) {
+      setError("Authentication information is missing. Please log in again.");
+      setTimeout(() => navigate("/login"), 3000);
       return;
     }
 
     try {
+      setLoading(true);
       const formattedDate = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
       const dayName = selectedDate.toLocaleDateString("en-US", { weekday: "long" });
 
@@ -96,16 +125,19 @@ const TrainerAvailability = ({ trainerId }) => {
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      setAvailability(response.data.availableSlots || []);
-      alert("Availability successfully updated!");
+      setAvailability(response.data.availability.availableSlots || []);
+      setError(null);
+      setSelectedTime(""); // Clear the time input after successful update
     } catch (error) {
       console.error("Error updating availability:", error.response?.data || error.message);
-      alert("Failed to update availability. Please try again.");
+      setError("Failed to update availability. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,16 +145,19 @@ const TrainerAvailability = ({ trainerId }) => {
   const removeTimeSlot = async (day, timeToRemove) => {
     // Confirmation dialog
     const isConfirmed = window.confirm("Are you sure you want to delete this time slot?");
-    if (!isConfirmed) return; // Stop if the user cancels
+    if (!isConfirmed) return;
   
-    const trainerId = localStorage.getItem("trainerId"); // Get Trainer ID from storage
+    const trainerId = localStorage.getItem("trainerId");
+    const token = localStorage.getItem("token");
   
-    if (!trainerId) {
-      alert("Trainer ID is missing. Please log in again.");
+    if (!trainerId || !token) {
+      setError("Authentication information is missing. Please log in again.");
+      setTimeout(() => navigate("/login"), 3000);
       return;
     }
   
     try {
+      setLoading(true);
       // Find the existing slot for the selected day
       const existingSlot = availability.find((slot) => slot.day === day);
       if (!existingSlot) return;
@@ -141,7 +176,7 @@ const TrainerAvailability = ({ trainerId }) => {
         );
       }
   
-      await axios.put(
+      const response = await axios.put(
         `http://localhost:5000/api/trainers/availability`,
         {
           trainerId,
@@ -149,41 +184,54 @@ const TrainerAvailability = ({ trainerId }) => {
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
   
-      setAvailability(updatedSlots);
-      alert("Time slot removed successfully!");
+      setAvailability(response.data.availability.availableSlots || []);
+      setError(null);
     } catch (error) {
       console.error("Error deleting time slot:", error.response?.data || error.message);
-      alert("Failed to remove time slot. Please try again.");
+      setError("Failed to remove time slot. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   // Handle click on an existing time slot for editing
   const handleEditSlot = (day, time) => {
     setEditingSlot({ day, time });
-    setUpdatedTime(new Date(time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    const timeObj = new Date(time);
+    const hours = String(timeObj.getHours()).padStart(2, '0');
+    const minutes = String(timeObj.getMinutes()).padStart(2, '0');
+    setUpdatedTime(`${hours}:${minutes}`);
   };
 
   // Save the updated time slot
   const saveUpdatedSlot = async () => {
     if (!updatedTime) {
-      alert("Please select a time before updating.");
+      setError("Please select a time before updating.");
       return;
     }
 
-    const trainerId = localStorage.getItem("trainerId"); // Get Trainer ID from storage
+    const trainerId = localStorage.getItem("trainerId");
+    const token = localStorage.getItem("token");
 
-    if (!trainerId) {
-      alert("Trainer ID is missing. Please log in again.");
+    if (!trainerId || !token) {
+      setError("Authentication information is missing. Please log in again.");
+      setTimeout(() => navigate("/login"), 3000);
       return;
     }
 
     try {
-      const formattedTime = `${selectedDate.toISOString().split("T")[0]}T${updatedTime}:00Z`;
+      setLoading(true);
+      // Extract date from the original time slot to maintain the same date
+      const originalDate = new Date(editingSlot.time).toISOString().split('T')[0];
+      
+      // Format the updated time correctly
+      const [hours, minutes] = updatedTime.split(':');
+      const formattedTime = `${originalDate}T${hours}:${minutes}:00Z`;
 
       // Update the time slot in the availability array
       const updatedSlots = availability.map((slot) =>
@@ -197,7 +245,6 @@ const TrainerAvailability = ({ trainerId }) => {
           : slot
       );
 
-      // Send updated availability to the backend
       const response = await axios.put(
         `http://localhost:5000/api/trainers/availability`,
         {
@@ -206,18 +253,19 @@ const TrainerAvailability = ({ trainerId }) => {
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      // Update local state with the response from the backend
-      setAvailability(response.data.availableSlots || []);
+      setAvailability(response.data.availability.availableSlots || []);
       setEditingSlot(null); // Clear editing state
-      alert("Time slot updated successfully!");
+      setError(null);
     } catch (error) {
       console.error("Error updating time slot:", error.response?.data || error.message);
-      alert("Failed to update time slot. Please try again.");
+      setError("Failed to update time slot. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -225,8 +273,14 @@ const TrainerAvailability = ({ trainerId }) => {
     <div className="availability-container">
       <h2>Manage Availability</h2>
 
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+
       {loading ? (
-        <p>Loading availability...</p>
+        <div className="loading-spinner">Loading availability...</div>
       ) : (
         <>
           {/* Calendar for Date Selection */}
@@ -254,8 +308,12 @@ const TrainerAvailability = ({ trainerId }) => {
           </div>
 
           {/* Button to Add/Update Availability */}
-          <button onClick={updateAvailability} className="update-btn">
-            Set Available
+          <button 
+            onClick={updateAvailability} 
+            className="update-btn"
+            disabled={loading || !selectedTime}
+          >
+            {loading ? "Setting..." : "Set Available"}
           </button>
 
           {/* List of Current Availability Slots */}
@@ -269,11 +327,19 @@ const TrainerAvailability = ({ trainerId }) => {
                     <ul>
                       {slot.time.map((t, i) => (
                         <li key={i}>
-                          {new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          <button className="delete-btn" onClick={() => removeTimeSlot(slot.day, t)}>
+                          {formatTimeDisplay(t)}
+                          <button 
+                            className="delete-btn" 
+                            onClick={() => removeTimeSlot(slot.day, t)}
+                            disabled={loading}
+                          >
                             ❌
                           </button>
-                          <button className="edit-btn" onClick={() => handleEditSlot(slot.day, t)}>
+                          <button 
+                            className="edit-btn" 
+                            onClick={() => handleEditSlot(slot.day, t)}
+                            disabled={loading}
+                          >
                             ✏️
                           </button>
                         </li>
@@ -284,7 +350,7 @@ const TrainerAvailability = ({ trainerId }) => {
               </ul>
             </div>
           ) : (
-            <p>No availability slots found.</p>
+            <p>No availability slots found. Add your first time slot above.</p>
           )}
 
           {/* Edit Form for Updating Time Slot */}
@@ -297,8 +363,15 @@ const TrainerAvailability = ({ trainerId }) => {
                 value={updatedTime}
                 onChange={(e) => setUpdatedTime(e.target.value)}
               />
-              <button onClick={saveUpdatedSlot}>Save</button>
-              <button onClick={() => setEditingSlot(null)}>Cancel</button>
+              <div className="edit-buttons">
+                <button 
+                  onClick={saveUpdatedSlot}
+                  disabled={loading || !updatedTime}
+                >
+                  {loading ? "Saving..." : "Save"}
+                </button>
+                <button onClick={() => setEditingSlot(null)}>Cancel</button>
+              </div>
             </div>
           )}
         </>
@@ -308,4 +381,3 @@ const TrainerAvailability = ({ trainerId }) => {
 };
 
 export default TrainerAvailability;
-
