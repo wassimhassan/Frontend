@@ -63,7 +63,6 @@ const Navbar = () => {
   <>
     <li><Link to="/gym-owner/dashboard" className="nb-nav-link">Dashboard</Link></li>
     <li><Link to="/gym-owner/subscriptions" className="nb-nav-link">Manage Subscriptions</Link></li> 
-    <li><Link to="/gym-owner/payments" className="nb-nav-link">Manage Payments</Link></li> 
     <li><Link to="/gym-owner/unpaid-clients" className="nb-nav-link">Unpaid Clients</Link></li>
   </>
 )}

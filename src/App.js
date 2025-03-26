@@ -20,9 +20,7 @@ import ViewBookings from "./components/ViewBookings";
 import ViewAvailability from "./components/ViewAvailability";
 import SubscriptionManagement from "./components/SubscriptionManagement";
 import GymOwnerDashBoard from "./components/GymOwnerDashBoard";
-import ManageSubscription from "./components/ManageSubscription";
 import SubscriptionForm from "./components/SubscriptionForm"; 
-import PaymentsPage from "./components/PaymentsPage"; 
 import GymOwnerLogin from "./components/GymOwnerLogin";
 import UnpaidClients from "./components/UnpaidClients"; 
 
@@ -55,11 +53,7 @@ function App() {
 
   return (
     <Router>
-      <MainContent
-        trainerId={trainerId}
-        setTrainerId={setTrainerId}
-        userRole={userRole}
-      />
+      <MainContent trainerId={trainerId} setTrainerId={setTrainerId} userRole={userRole} />
     </Router>
   );
 }
@@ -117,7 +111,6 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
             <Route path="/chat" element={<ProtectedRoute element={<Chat />} allowedRoles={["client"]} />} />
             <Route path="/booking" element={<ProtectedRoute element={<BookingsPage />} allowedRoles={["client"]} />} />
             <Route path="/view-bookings" element={<ProtectedRoute element={<ViewBookings />} allowedRoles={["client"]} />} />
-            <Route path="/payments" element={<ProtectedRoute element={<PaymentsPage />} allowedRoles={["client"]} />} />
             <Route path="/subscribe" element={<ProtectedRoute element={<SubscriptionForm />} allowedRoles={["client"]} />} />
             <Route path="/client-dashboard" element={<ProtectedRoute element={<ClientDashboard />} allowedRoles={["client"]} />} />
           </>
@@ -141,7 +134,6 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
           <>
             <Route path="/gym-owner/dashboard" element={<ProtectedRoute element={<GymOwnerDashBoard />} allowedRoles={["gymOwner"]} />} />
             <Route path="/gym-owner/subscriptions" element={<ProtectedRoute element={<SubscriptionManagement />} allowedRoles={["gymOwner"]} />} />
-            <Route path="/gym-owner/payments" element={<ProtectedRoute element={<ManageSubscription />} allowedRoles={["gymOwner"]} />} />
             <Route path="/gym-owner/unpaid-clients" element={<ProtectedRoute element={<UnpaidClients />} allowedRoles={["gymOwner"]} />} />
           </>
         )}
