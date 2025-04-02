@@ -85,7 +85,7 @@ const ProtectedRoute = ({ element, allowedRoles }) => {
 
 function MainContent({ trainerId, setTrainerId, userRole }) {
   const location = useLocation();
-  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const hideNavbarPaths = ["/", "/WelcomePage", "/signup", "/login", "/reset-password", "/trainer-login", "/gym-owner-login"];
