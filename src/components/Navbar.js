@@ -8,17 +8,20 @@ const Navbar = () => {
   // ✅ Read user role & token from localStorage
   const [userRole, setUserRole] = useState(localStorage.getItem("role") || "");
   const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [userId, setUserId] = useState(localStorage.getItem("clientId") || ""); // Storing the logged-in user's ID
 
   // ✅ Ensure role updates properly
   useEffect(() => {
     const storedRole = localStorage.getItem("role");
     const storedToken = localStorage.getItem("token");
+    const storedClientId = localStorage.getItem("clientId"); // Retrieving client ID from localStorage
 
     if (!storedToken) {
       navigate("/login");
     } else {
       setUserRole(storedRole);
       setToken(storedToken);
+      setUserId(storedClientId);
     }
   }, [navigate]);
 
@@ -27,7 +30,9 @@ const Navbar = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("trainerId");
     localStorage.removeItem("role");
+    localStorage.removeItem("clientId");
     setUserRole("");
+    setUserId("");
     navigate("/");
   };
 
@@ -45,6 +50,7 @@ const Navbar = () => {
             <li><Link to="/subscribe" className="nb-nav-link">Subscribe</Link></li> {/* Added Subscription Page */}
             <li><Link to="/chat" className="nb-nav-link">Chat</Link></li>
             <li><Link to="/workout-plan" className="nb-nav-link">Workout-Plan</Link></li>
+            <li><Link to="/aisuggestions" className="nb-nav-link">AI Suggestions</Link></li>
           </>
         )}
 

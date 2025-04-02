@@ -8,6 +8,8 @@
     "axios": "^1.7.9",
     "cmps271": "file:../Frontend",
     "cra-template": "1.2.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "react": "^19.0.0",
     "react-calendar": "^5.1.0",
     "react-dom": "^19.0.0",
