@@ -71,8 +71,15 @@ const ViewAvailability = () => {
 
             console.log("✅ Trainer bookings received:", response.data);
 
+            // Handle different response formats
+            const bookingsArray = Array.isArray(response.data)
+                ? response.data
+                : (response.data.bookings || response.data.data || []);
+
+            console.log("✅ Processed bookings array:", bookingsArray);
+
             // ✅ Filter out bookings where `clientId` is missing or sessionTime is undefined
-            const validBookings = response.data.filter(booking => {
+            const validBookings = bookingsArray.filter(booking => {
                 if (!booking.clientId) {
                     console.warn(`⚠️ Skipping booking with missing clientId:`, booking);
                     return false;
@@ -130,12 +137,13 @@ const ViewAvailability = () => {
         return clientBookings;
     };
 
-    // Mark a session as completed
-    const markSessionComplete = async (bookingId) => {
+    // Toggle session completion status
+    const toggleSessionStatus = async (bookingId, currentStatus) => {
         try {
+            const newStatus = !currentStatus;
             await axios.put(
-                `${process.env.REACT_APP_BACKEND_URL}/api/booking/booking/${bookingId}/complete`,
-                { completed: true },
+                `${process.env.REACT_APP_BACKEND_URL}/api/booking/booking/${bookingId}/toggle-status`,
+                { completed: newStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -143,15 +151,15 @@ const ViewAvailability = () => {
             setBookings(prevBookings =>
                 prevBookings.map(booking =>
                     booking._id === bookingId
-                        ? { ...booking, completed: true }
+                        ? { ...booking, completed: newStatus }
                         : booking
                 )
             );
 
-            console.log("✅ Session marked as completed");
+            console.log(`✅ Session marked as ${newStatus ? 'completed' : 'undone'}`);
         } catch (error) {
-            console.error("❌ Error marking session as complete:", error.response?.data || error.message);
-            alert("Failed to mark session as complete.");
+            console.error("❌ Error updating session status:", error.response?.data || error.message);
+            alert(`Failed to mark session as ${currentStatus ? 'undone' : 'complete'}.`);
         }
     };
 
@@ -230,20 +238,28 @@ const ViewAvailability = () => {
                             <h3>Your Available Slots</h3>
                             {availability.length > 0 ? (
                                 <ul className="va-availability-list">
-                                    {availability.map((slot, index) => (
-                                        <li key={index} className="va-slot">
-                                            <strong>{slot.day}:</strong>{" "}
-                                            {slot.time.map((time, i) => (
-                                                <span key={i} className="va-time">
-                                                    {new Date(time).toLocaleTimeString([], {
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                    })}
-                                                </span>
-                                            ))}
-                                        </li>
-                                    ))}
-                                </ul>
+                                {availability.map((slot, index) => (
+                                  <li key={index} className="va-slot">
+                                    {slot.time.length > 0 ? (
+                                      slot.time.map((time, i) => (
+                                        <div key={i} className="va-time">
+                                          📅 {new Date(time).toLocaleDateString(undefined, {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric"
+                                          })} - 🕒 {new Date(time).toLocaleTimeString([], {
+                                            hour: "2-digit",
+                                            minute: "2-digit"
+                                          })}
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <p>No time slots on {slot.day}</p>
+                                    )}
+                                  </li>
+                                ))}
+                              </ul>
                             ) : (
                                 <p className="va-no-slots">No available slots. Please set your availability.</p>
                             )}
@@ -256,11 +272,11 @@ const ViewAvailability = () => {
                             {bookings.length > 0 ? (
                                 <div className="va-bookings-list">
                                     {bookings.map((booking) => (
-                                        <div key={booking._id} className={`va-booking-card ${booking.completed ? "completed" : ""}`}>
+                                        <div key={booking._id} className={`va-booking-card ${booking.completed ? "completed" : "undone"}`}>
                                             <div className="va-booking-header">
                                                 <h4>Session with {getClientName(booking.clientId)}</h4>
-                                                <span className={`va-status ${booking.completed ? "completed" : "upcoming"}`}>
-                                                    {booking.completed ? "Completed" : "Upcoming"}
+                                                <span className={`va-status ${booking.completed ? "completed" : "undone"}`}>
+                                                    {booking.completed ? "Completed" : "Undone"}
                                                 </span>
                                             </div>
 
@@ -268,14 +284,12 @@ const ViewAvailability = () => {
                                                 <p><i className="fas fa-calendar"></i> {formatDateTime(booking.sessionTime)}</p>
                                             </div>
 
-                                            {!booking.completed && (
-                                                <button
-                                                    className="va-mark-complete"
-                                                    onClick={() => markSessionComplete(booking._id)}
-                                                >
-                                                    Mark as Completed
-                                                </button>
-                                            )}
+                                            <button
+                                                className={`va-toggle-status ${booking.completed ? "undone-btn" : "complete-btn"}`}
+                                                onClick={() => toggleSessionStatus(booking._id, booking.completed)}
+                                            >
+                                                {booking.completed ? "Mark as Undone" : "Mark as Complete"}
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
@@ -284,7 +298,6 @@ const ViewAvailability = () => {
                             )}
                         </div>
                     )}
-
 
                     {activeTab === "clients" && (
                         <div className="va-clients-section">
@@ -303,9 +316,11 @@ const ViewAvailability = () => {
                                                 {getClientSessions(client._id).length > 0 ? (
                                                     <ul>
                                                         {getClientSessions(client._id).map(booking => (
-                                                            <li key={booking._id} className={booking.completed ? "completed" : ""}>
+                                                            <li key={booking._id} className={booking.completed ? "completed" : "undone"}>
                                                                 {formatDateTime(booking.sessionTime)}
-                                                                {booking.completed && <span className="va-completed-badge">✓</span>}
+                                                                <span className="va-status-badge">
+                                                                    {booking.completed ? "✓ Completed" : "⨯ Undone"}
+                                                                </span>
                                                             </li>
                                                         ))}
                                                     </ul>

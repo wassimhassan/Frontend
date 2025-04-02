@@ -1,80 +1,195 @@
+/* Base Container */
 .availability-container {
-  max-width: 600px;
+  position: relative;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  padding: 30px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #fff;
 }
 
 .availability-container h2 {
   text-align: center;
-  color: #333;
-  margin-bottom: 20px;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  font-weight: 600;
+  border-bottom: 2px solid #4CAF50;
+  padding-bottom: 10px;
 }
 
+/* Error and Loading States */
 .error-message {
-  background-color: #ffdddd;
-  color: #ff0000;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 15px;
+  background-color: #fde8e8;
+  color: #e53e3e;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
   text-align: center;
+  border-left: 4px solid #e53e3e;
+  font-weight: 500;
 }
 
 .loading-spinner {
   text-align: center;
   color: #666;
   font-style: italic;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
 }
 
+/* Calendar Customization */
+.react-calendar {
+  width: 100%;
+  max-width: 100%;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  font-family: inherit;
+  line-height: 1.125em;
+  margin-bottom: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.react-calendar__navigation {
+  background-color: #1283f4;
+  border-radius: 8px 8px 0 0;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  background-color: #e2e8f0;
+}
+
+.react-calendar__month-view__weekdays {
+  font-weight: bold;
+  font-size: 0.9em;
+  color: #4CAF50;
+}
+
+.react-calendar__tile {
+  color: #1a202c;
+  padding: 12px;
+  font-weight: 500;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: #edf2f7;
+  border-radius: 4px;
+}
+
+.react-calendar__tile--now {
+  background-color: #fff9db;
+  color: #1a202c;
+  border-radius: 4px;
+}
+
+.react-calendar__tile--active {
+  background-color: #4CAF50 !important;
+  color: white !important;
+  border-radius: 4px;
+}
+
+.available-day {
+  background-color: #e6f7e6 !important;
+  border-radius: 4px;
+  position: relative;
+}
+
+.available-day::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: #4CAF50;
+  border-radius: 50%;
+}
+
+/* Time Selection Area */
 .time-selection {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 20px 0;
+  margin: 25px 0;
+  gap: 15px;
 }
 
 .time-selection label {
-  margin-right: 10px;
+  font-weight: 600;
+  color: #4a5568;
 }
 
 .time-selection input[type="time"] {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px 15px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  background-color: #f8fafc;
 }
 
+.time-selection input[type="time"]:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+/* Action Buttons */
 .update-btn {
   display: block;
-  width: 200px;
-  margin: 20px auto;
-  padding: 10px;
+  width: 220px;
+  margin: 25px auto;
+  padding: 12px;
   background-color: #4CAF50;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .update-btn:disabled {
-  background-color: #cccccc;
+  background-color: #cbd5e0;
   cursor: not-allowed;
 }
 
 .update-btn:hover:not(:disabled) {
-  background-color: #45a049;
+  background-color: #3d8b40;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.update-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Availability List */
 .availability-list {
-  margin-top: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 15px;
+  margin-top: 30px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #f8fafc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .availability-list h3 {
-  margin-bottom: 10px;
-  color: #333;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .availability-list ul {
@@ -83,25 +198,57 @@
 }
 
 .availability-list > ul > li {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
-.availability-list ul ul li {
+/* Slot item styling */
+.slot-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
-  background-color: #f9f9f9;
-  margin: 5px 0;
-  border-radius: 4px;
+  padding: 12px 15px;
+  background-color: white;
+  margin: 8px 0;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 3px solid #4CAF50;
+  position: relative;
+}
+
+.slot-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.slot-item strong {
+  color: #4a5568;
+}
+
+/* Action Buttons for Slots */
+.slot-actions {
+  display: flex;
+  align-items: center;
 }
 
 .delete-btn, .edit-btn {
   background: none;
   border: none;
   cursor: pointer;
-  margin-left: 10px;
-  font-size: 16px;
+  margin-left: 12px;
+  font-size: 18px;
+  transition: transform 0.2s, opacity 0.2s;
+  padding: 5px;
+  border-radius: 50%;
+}
+
+.delete-btn:hover, .edit-btn:hover {
+  transform: scale(1.2);
+  background-color: #f1f1f1;
+}
+
+.delete-btn:active, .edit-btn:active {
+  transform: scale(0.95);
 }
 
 .delete-btn:disabled, .edit-btn:disabled {
@@ -109,86 +256,82 @@
   cursor: not-allowed;
 }
 
-.edit-form {
-  margin-top: 20px;
+/* Popup Edit Form */
+.popup-edit-form {
+  width: 280px;
   padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #f5f5f5;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  animation: popIn 0.3s ease-out;
 }
 
-.edit-form h3 {
-  margin-bottom: 15px;
-  color: #333;
+@keyframes popIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
 }
 
-.edit-form input[type="time"] {
-  padding: 8px;
+.popup-edit-form h3 {
+  margin-top: 0;
   margin-bottom: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 16px;
+  text-align: center;
 }
 
-.edit-buttons {
+.popup-edit-form p {
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #4a5568;
+  text-align: center;
+}
+
+.popup-edit-form input[type="time"] {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.popup-edit-form .edit-buttons {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   gap: 10px;
 }
 
-.edit-buttons button {
-  padding: 8px 15px;
+.popup-edit-form .edit-buttons button {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.edit-buttons button:first-child {
   background-color: #4CAF50;
   color: white;
+  transition: background-color 0.2s;
 }
 
-.edit-buttons button:first-child:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
+.popup-edit-form .edit-buttons button:last-child {
+  background-color: #e2e8f0;
+  color: #4a5568;
 }
 
-.edit-buttons button:last-child {
-  background-color: #f0f0f0;
-  color: #333;
+.popup-edit-form .edit-buttons button:hover {
+  background-color: #3d8b40;
 }
 
-/* Handling the Calendar Styles */
-.react-calendar {
-  width: 100%;
-  max-width: 100%;
-  background-color:rgb(255, 255, 255);
-  border: 1px solid #1703f5;
-  font-family: Arial, Helvetica, sans-serif;
-  line-height: 1.125em;
-  margin-bottom: 20px;
-}
-
-.react-calendar__tile--available-day {
-  background-color: #e6f3e6 !important;
-}
-
-.react-calendar__tile{
-  color:#1703f5;
-}
-
-.react-calendar__tile:enabled:hover,
-.react-calendar__tile:enabled:focus {
-  background-color: #f0f0f0;
-  color:#333;
-}
-
-.react-calendar__tile--now {
-  background-color: #ffff76;
-  color: #333;
-}
-
-.react-calendar__tile--active {
-  background-color: #4CAF50 !important;
-  color: white !important;
+.popup-edit-form .edit-buttons button:last-child:hover {
+  background-color: #cbd5e0;
 }

@@ -1,28 +1,29 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; // For navigation
-import "./FirstPage.css"; // Import the CSS file
+import { useNavigate } from "react-router-dom";
+import "./FirstPage.css"; // Import your CSS file for styling
 
 const FirstPage = () => {
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   return (
-    <div className="FP-container">
-      <h1 className="FP-title">Choose Your Role</h1>
-      <div className="FP-button-container">
+    <div className="role-selection-wrapper">
+      <h1 className="role-selection-heading">Choose Your Role</h1>
+      <div className="role-selection-buttons">
         <button
-          className="FP-button"
-          onClick={() => navigate("/trainer-login")} // Navigate to TrainerLogin
+          className="role-button trainer-button"
+          onClick={() => navigate("/trainer-login")}
         >
           Personal Trainer
         </button>
         <button
-          className="FP-button"
-          onClick={() => navigate("/WelcomePage")} // Navigate to Client
+          className="role-button client-button"
+          onClick={() => navigate("/WelcomePage")}
         >
           Client
         </button>
         <button
-          onClick={() => navigate("/gym-owner-login")} // Navigate to Gym Owner Login
+          className="role-button owner-button"
+          onClick={() => navigate("/gym-owner-login")}
         >
           Gym Owner
         </button>
