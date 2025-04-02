@@ -6,28 +6,12 @@ import { Elements, CardElement, useStripe, useElements } from "@stripe/react-str
 import "./SubscriptionForm.css";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY || "");
-
-const PLAN_DETAILS = {
-    basic: { 
-        bookings: 8, 
-        basePrice: 29.99 
-    },
-    premium: { 
-        bookings: 15, 
-        basePrice: 49.99 
-    },
-    pro: { 
-        bookings: 25, 
-        basePrice: 79.99 
-    }
-};
-
-const StripeSubscriptionForm = ({ 
-    planType, 
-    planPrice, 
-    endDate, 
-    onSubmitSuccess, 
-    onError 
+const StripeSubscriptionForm = ({
+    planType,
+    planPrice,
+    endDate,
+    onSubmitSuccess,
+    onError
 }) => {
     const stripe = useStripe();
     const elements = useElements();
@@ -58,11 +42,11 @@ const StripeSubscriptionForm = ({
             }
 
             // Submit subscription with Stripe payment method
-            const subscriptionData = { 
-                planType, 
-                endDate, 
+            const subscriptionData = {
+                planType,
+                endDate,
                 method: "stripe",
-                price: planPrice,
+                transactionId: paymentMethod.id,
                 paymentMethodId: paymentMethod.id
             };
 
@@ -88,8 +72,8 @@ const StripeSubscriptionForm = ({
     return (
         <form onSubmit={handleSubmit}>
             <CardElement className="card-element" />
-            <button 
-                type="submit" 
+            <button
+                type="submit"
                 disabled={!stripe || loading}
                 className="stripe-submit-button"
             >
@@ -106,61 +90,103 @@ const SubscriptionForm = () => {
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
+    const [amountDue, setAmountDue] = useState(null);
+    const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+    const [plans, setPlans] = useState([]);
+    const [isSubscriptionButtonDisabled, setIsSubscriptionButtonDisabled] = useState(false);
     const navigate = useNavigate();
-    
+
     const token = localStorage.getItem("token");
-    
+
     // Dynamic price calculation
     const planPrice = useMemo(() => {
-        return PLAN_DETAILS[planType].basePrice;
-    }, [planType]);
+        const plan = plans.find(p => p.name === planType);
+        return plan ? plan.basePrice : 0;
+    }, [planType, plans]);
 
     // Validation for end date
     const isValidEndDate = (date) => {
         const selectedDate = new Date(date);
         const today = new Date();
         const maxDate = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
-        
+
         return selectedDate > today && selectedDate <= maxDate;
     };
-    
+
     useEffect(() => {
         if (!token) {
             navigate("/login");
+        } else {
+            const fetchPlans = async () => {
+                try {
+                    const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/subscriptions/plans`);
+                    setPlans(response.data);
+                } catch (error) {
+                    console.error("Error fetching plans:", error);
+                }
+            };
+            const fetchAmountDue = async () => {
+                try {
+                    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payment/amount-due`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    setAmountDue(data.amountDue);
+                } catch (err) {
+                    console.error("Error fetching amount due:", err);
+                }
+            };
+            const fetchSubscriptionStatus = async () => {
+                try {
+                    const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/subscriptions/subscription-status`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setSubscriptionStatus(res.data);
+                    if (res.data.hasActiveSubscription && res.data.remainingSessions > 0) {
+                        setIsSubscriptionButtonDisabled(true);
+                    }
+                } catch (err) {
+                    console.error("Error fetching subscription status:", err);
+                }
+            };
+
+            fetchAmountDue();
+            fetchPlans();
+            fetchSubscriptionStatus();
         }
     }, [token, navigate]);
-    
+
     const handleCashPayment = async () => {
         setLoading(true);
         setErrorMessage("");
         setSuccessMessage("");
-        
+
         // Validation
         if (!isValidEndDate(endDate)) {
             setErrorMessage("Please select a valid future date within the next 12 months.");
             setLoading(false);
             return;
         }
-        
-        const subscriptionData = { 
-            planType, 
-            endDate, 
+
+        const subscriptionData = {
+            planType,
+            endDate,
             method: "cash",
             price: planPrice
         };
-        
+
         try {
             const response = await axios.post(
                 `${process.env.REACT_APP_BACKEND_URL}/api/payment/accept-cash-payment`,
                 subscriptionData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            
+
             setSuccessMessage("Cash payment pending. Please complete payment at the gym.");
             setTimeout(() => {
                 navigate("/cash-payment-instructions");
             }, 2000);
-            
+
             setLoading(false);
         } catch (error) {
             console.error("Cash Payment Error:", error.response?.data);
@@ -168,57 +194,58 @@ const SubscriptionForm = () => {
             setLoading(false);
         }
     };
-    
+
     return (
         <div className="subscription-form-container">
             <h2>Subscribe to a Plan</h2>
             <div className="form-group">
                 <label>Select a Plan:</label>
-                <select 
-                    value={planType} 
-                    onChange={(e) => setPlanType(e.target.value)} 
+                <select
+                    value={planType}
+                    onChange={(e) => setPlanType(e.target.value)}
                     required
+                    disabled={isSubscriptionButtonDisabled}
                 >
-                    {Object.entries(PLAN_DETAILS).map(([key, plan]) => (
-                        <option key={key} value={key}>
-                            {key.charAt(0).toUpperCase() + key.slice(1)} - {plan.bookings} Bookings (${plan.basePrice}/month)
+                    {plans.map((plan) => (
+                        <option key={plan.name} value={plan.name}>
+                            {plan.name.charAt(0).toUpperCase() + plan.name.slice(1)} - {plan.bookings} Bookings (${plan.basePrice}/month)
                         </option>
                     ))}
                 </select>
             </div>
-            
+
             <div className="form-group">
                 <label>Subscription End Date:</label>
-                <input 
-                    type="date" 
-                    value={endDate} 
+                <input
+                    type="date"
+                    value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
                     max={new Date(new Date().getFullYear() + 1, new Date().getMonth(), new Date().getDate()).toISOString().split('T')[0]}
-                    required 
+                    required
                 />
             </div>
-            
+
             <div className="form-group">
                 <label>Payment Method:</label>
-                <select 
-                    value={method} 
-                    onChange={(e) => setMethod(e.target.value)} 
+                <select
+                    value={method}
+                    onChange={(e) => setMethod(e.target.value)}
                     required
                 >
                     <option value="stripe">Credit Card (Stripe)</option>
                     <option value="cash">Cash (Gym Payment)</option>
                 </select>
             </div>
-            
+
             <div className="price-summary">
                 <p>Selected Plan: {planType.charAt(0).toUpperCase() + planType.slice(1)}</p>
                 <p>Monthly Price: ${planPrice}</p>
             </div>
-            
+
             {method === "stripe" ? (
                 <Elements stripe={stripePromise}>
-                    <StripeSubscriptionForm 
+                    <StripeSubscriptionForm
                         planType={planType}
                         planPrice={planPrice}
                         endDate={endDate}
@@ -232,14 +259,18 @@ const SubscriptionForm = () => {
                     />
                 </Elements>
             ) : (
-                <button 
-                    onClick={handleCashPayment} 
-                    disabled={loading}
-                >
+                <button
+                    onClick={handleCashPayment}
+                    disabled={loading || isSubscriptionButtonDisabled}  // Disable if already subscribed
+                    >
                     {loading ? "Processing..." : "Submit Cash Payment"}
                 </button>
             )}
-            
+            {method === "cash" && amountDue !== null && (
+                <div className="amount-due">
+                    <p>💰 <strong>Amount Due:</strong> ${amountDue}</p>
+                </div>
+            )}
             {errorMessage && <p className="error">{errorMessage}</p>}
             {successMessage && <p className="success">{successMessage}</p>}
         </div>

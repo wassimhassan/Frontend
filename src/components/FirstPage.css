@@ -1,6 +1,5 @@
-/* WelcomePage.css */
-.FP-container {
-    display: flex;
+.role-selection-wrapper {
+  display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -10,41 +9,98 @@
     background-position: center;
     background-repeat: no-repeat;
     padding: 20px;
+}
+
+.role-selection-heading {
+  font-size: 2.5rem;
+  color: #fbf7f8;
+  margin-bottom: 40px;
+  text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.role-selection-heading::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(to right, #f5f4f4, #185a97);
+  border-radius: 10px;
+}
+
+.role-selection-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.role-button {
+  padding: 16px 24px;
+  border-radius: 50px;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.role-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.role-button:hover::before {
+  left: 0;
+}
+
+.role-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.role-button:active {
+  transform: translateY(0);
+}
+
+.trainer-button {
+  background: linear-gradient(to right, #42a5f5, #2196f3);
+  color: white;
+}
+
+.client-button {
+  background: linear-gradient(to right, #ff7043, #ff5722);
+  color: white;
+}
+
+.owner-button {
+  background: linear-gradient(to right, #66bb6a, #4caf50);
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .role-selection-heading {
+    font-size: 2rem;
   }
   
-  .FP-title {
-    font-size: 1.8rem; /* Slightly larger title */
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #fff; /* White text for visibility */
-    text-align: center;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Shadow for better readability */
+  .role-button {
+    padding: 14px 20px;
+    font-size: 1rem;
   }
-  
-  .FP-button-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px; /* Space between buttons */
-  }
-  
-  .FP-button {
-    width: 180px; /* Increased button size */
-    height: 50px; /* Increased height */
-    font-size: 1rem; /* Slightly bigger text */
-    font-weight: bold;
-    background-color: rgba(0, 123, 255, 0.9); /* Solid Blue */
-    color: #fff;
-    border: none;
-    border-radius: 8px; /* Slightly rounded corners */
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    text-align: center;
-    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-  }
-  
-  .FP-button:hover {
-    background-color: rgba(0, 86, 179, 0.9); /* Darker blue */
-    transform: scale(1.05); /* Slight pop effect */
-  }
-  
+}

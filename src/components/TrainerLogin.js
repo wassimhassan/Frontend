@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "./TrainerLogin.css"; 
 
-const TrainerLogin = ({ setTrainerId}) => {
+const TrainerLogin = ({ setTrainerId }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -33,39 +34,53 @@ const TrainerLogin = ({ setTrainerId}) => {
       console.log("📌 Stored Role:", localStorage.getItem("role"));
 
       // ✅ Force reloading to make sure role is applied
-      window.location.href = "/profile"; 
+      window.location.href = "/profile";
     } catch (error) {
       console.error("❌ Login failed:", error.response?.data || error.message);
       alert("Invalid credentials. Please try again.");
     }
   };
 
+  const handleBack = () => {
+    navigate("/FirstPage"); // Navigate back to the first page
+  };
+
+
   return (
-    <div className="tl-container">
-      <h2 className="tl-title">Trainer Login</h2>
-      <form className="tl-form" onSubmit={handleLogin}>
-        <label className="tl-label">Email:</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="tl-input"
-          required
-        />
+    <div className="trainer-auth-wrapper">
+      <div className="trainer-auth-back-button" onClick={handleBack}>
+         Back
+      </div>
+      <div className="trainer-auth-card">
+        <h2 className="trainer-auth-heading">Trainer Login</h2>
+        <form className="trainer-auth-form" onSubmit={handleLogin}>
+          <div className="trainer-auth-input-group">
+            <label className="trainer-auth-label">Email:</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="trainer-auth-input"
+              required
+            />
+          </div>
 
-        <label className="tl-label">Password:</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="tl-input"
-          required
-        />
+          <div className="trainer-auth-input-group">
+            <label className="trainer-auth-label">Password:</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="trainer-auth-input"
+              required
+            />
+          </div>
 
-        <button type="submit" className="tl-button">
-          Login
-        </button>
-      </form>
+          <button type="submit" className="trainer-auth-submit-btn">
+            Login
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

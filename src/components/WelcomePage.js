@@ -5,8 +5,15 @@ import "./WelcomePage.css";
 const WelcomePage = () => {
   const navigate = useNavigate();
 
+  const handleBack = () => {
+    navigate("/FirstPage"); // Navigate back to the first page
+  };
+
   return (
     <div className="welcome-container">
+       <div className="back-button" onClick={handleBack}>
+         Back
+      </div>
       <div className="overlay">
         {/* Welcome Text */}
         <h1>Welcome!</h1>

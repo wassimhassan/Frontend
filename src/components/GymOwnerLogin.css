@@ -1,44 +1,75 @@
-.login-container {
-    width: 300px;
-    margin: 50px auto;
-    padding: 20px;
-    background: #f9f9f9;
-    border-radius: 8px;
-    text-align: center;
-  }
-  
-  .login-container h2 {
-    margin-bottom: 15px;
-  }
-  
-  .login-container .error {
-    color: red;
-    font-size: 14px;
-  }
-  
-  .login-container form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .login-container input {
-    padding: 10px;
-    margin: 8px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  .login-container button {
-    padding: 10px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  
-  .login-container button:disabled {
-    background: gray;
-  }
-  
+/* GymOwnerLogin.css */
+.gymOwner-login-container {
+  width: 600px;
+  margin: 200px auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.gymOwner-login-title {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 24px;
+}
+
+.gymOwner-login-error {
+  color: #e53935;
+  font-size: 14px;
+  margin-bottom: 12px;
+  padding: 8px;
+  background-color: rgba(229, 57, 53, 0.1);
+  border-radius: 4px;
+}
+
+.gymOwner-login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.gymOwner-login-label {
+  text-align: left;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: #555;
+}
+
+.gymOwner-login-input {
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+.gymOwner-login-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.gymOwner-login-button {
+  padding: 12px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.gymOwner-login-button:hover {
+  background: #0069d9;
+}
+
+.gymOwner-login-button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}

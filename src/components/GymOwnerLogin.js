@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./GymOwnerLogin.css"; // Ensure this file exists
-
+import "./GymOwnerLogin.css"; 
 const GymOwnerLogin = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [pin, setPin] = useState("");
@@ -43,20 +42,22 @@ const GymOwnerLogin = () => {
   };
 
   return (
-    <div className="login-container">
-      <h2>Gym Owner Login</h2>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleLogin}>
-        <label>Phone Number:</label>
+    <div className="gymOwner-login-container">
+      <h2 className="gymOwner-login-title">Gym Owner Login</h2>
+      {error && <p className="gymOwner-login-error">{error}</p>}
+      <form className="gymOwner-login-form" onSubmit={handleLogin}>
+        <label className="gymOwner-login-label">Phone Number:</label>
         <input
+          className="gymOwner-login-input"
           type="tel"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
           required
         />
 
-        <label>4-Digit PIN:</label>
+        <label className="gymOwner-login-label">4-Digit PIN:</label>
         <input
+          className="gymOwner-login-input"
           type="password"
           value={pin}
           onChange={(e) => setPin(e.target.value)}
@@ -64,10 +65,20 @@ const GymOwnerLogin = () => {
           maxLength={4}
         />
 
-        <button type="submit" disabled={loading}>
+        <button 
+          className="gymOwner-login-button" 
+          type="submit" 
+          disabled={loading}
+        >
           {loading ? "Logging in..." : "Login"}
         </button>
       </form>
+      <button 
+  className="gymOwner-back-button" 
+  onClick={() => navigate("/")}
+>
+  ← Back to Home
+</button>
     </div>
   );
 };

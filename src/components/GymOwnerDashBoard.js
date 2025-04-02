@@ -17,10 +17,10 @@ const GymOwnerDashboard = () => {
         setLoading(true);
         // Use Promise.all for concurrent API calls
         const [subsRes, payRes] = await Promise.all([
-          axios.get("/api/subscriptions", { 
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/subscriptions`, { 
             headers: { Authorization: `Bearer ${token}` } 
           }),
-          axios.get("/api/payments", { 
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/payment`, { 
             headers: { Authorization: `Bearer ${token}` } 
           })
         ]);
