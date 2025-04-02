@@ -7,7 +7,7 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
     setIsLoggingIn(true); // Hide Navbar when user is on Login page
     return () => setIsLoggingIn(false); // Show Navbar when user leaves
   }, [setIsLoggingIn]);
-  
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,24 +18,26 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); 
+    setError("");
     setLoading(true);
-    
+
     try {
       const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
         email,
         password,
       });
-  
+
       if (response.status === 200) {
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("userId", response.data.user._id);
-        localStorage.setItem("role", response.data.user.role);  // Store role (client/trainer)
-  
-        if (response.data.user.role === "client") {
-          window.location.href = "/profile"; 
-        } else if (response.data.user.role === "trainer") {
-          window.location.href = "/availability"; 
+        const { token, user } = response.data;
+        localStorage.setItem("token", token);
+        localStorage.setItem("userId", user._id);
+        localStorage.setItem("role", user.role); // Store role (client/trainer)
+
+        // Redirect user based on role
+        if (user.role === "client") {
+          window.location.href = "/profile";
+        } else if (user.role === "trainer") {
+          window.location.href = "/availability";
         }
       }
     } catch (error) {
@@ -44,8 +46,9 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
     }
     
     setLoading(false);
-  };  
+  };
 
+  // Handle forgot password
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setResetMessage("");
@@ -90,7 +93,7 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
           </div>
           {error && <p className="error-message">{error}</p>}
           <div className="forgot-password">
-            <a 
+            <a
               href="#"
               onClick={(e) => {
                 e.preventDefault();
@@ -107,8 +110,8 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
         </form>
       </div>
 
-       {/* Forgot Password Modal */}
-       {showForgotPassword && (
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
         <div className="modal-overlay">
           <div className="modal">
             <h3>Reset Password</h3>

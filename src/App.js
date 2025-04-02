@@ -23,6 +23,7 @@ import GymOwnerDashBoard from "./components/GymOwnerDashBoard";
 import SubscriptionForm from "./components/SubscriptionForm"; 
 import GymOwnerLogin from "./components/GymOwnerLogin";
 import UnpaidClients from "./components/UnpaidClients"; 
+import AISuggestions from "./components/AISuggestions";
 
 function App() {
   console.log("App is rendering...");
@@ -92,7 +93,7 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
 
   return (
     <>
-      {!hideNavbarPaths.includes(location.pathname) && !isSigningUp && !isLoggingIn && <Navbar userRole={userRole} />}
+      {!hideNavbarPaths.includes(location.pathname) && isSigningUp && !isLoggingIn && <Navbar userRole={userRole} />}
 
       <Routes>
         {/* 🔹 Public Routes */}
@@ -113,6 +114,8 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
             <Route path="/view-bookings" element={<ProtectedRoute element={<ViewBookings />} allowedRoles={["client"]} />} />
             <Route path="/subscribe" element={<ProtectedRoute element={<SubscriptionForm />} allowedRoles={["client"]} />} />
             <Route path="/client-dashboard" element={<ProtectedRoute element={<ClientDashboard />} allowedRoles={["client"]} />} />
+            <Route path="/aisuggestions" element={<ProtectedRoute element={<AISuggestions />} allowedRoles={["client"]} />} />  
+
           </>
         )}
 
