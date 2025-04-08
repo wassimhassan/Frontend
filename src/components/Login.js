@@ -22,6 +22,9 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
     setLoading(true);
 
     try {
+      // Clear any existing authentication data
+      localStorage.clear();
+
       const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
         email,
         password,
@@ -30,8 +33,8 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
       if (response.status === 200) {
         const { token, user } = response.data;
         localStorage.setItem("token", token);
-        localStorage.setItem("userId", user._id);
-        localStorage.setItem("role", user.role); // Store role (client/trainer)
+        localStorage.setItem("userId", user.id);
+        localStorage.setItem("role", user.role);
 
         // Redirect user based on role
         if (user.role === "client") {

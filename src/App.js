@@ -1,29 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
-import FirstPage from "./components/FirstPage";
-import SignUp from "./components/SignUp";
-import Login from "./components/Login";
-import Chat from "./components/Chat";
-import Availability from "./components/TrainerAvailability";
-import TrainerLogin from "./components/TrainerLogin";
-import Navbar from "./components/Navbar";
-import ProfileCard from "./components/ProfileCard";
-import PTCard from "./components/PtCard";
-import ResetPassword from "./components/ResetPassword";
-import WelcomePage from "./components/WelcomePage";
-import WorkoutPlan from "./components/WorkoutPlan";
-import AssignWorkout from "./components/AssignWorkout";
-import TrainerDashboard from "./components/TrainerDashboard";
-import ClientDashboard from "./components/ClientDashboard";
-import BookingsPage from "./components/BookingsPage";
-import ViewBookings from "./components/ViewBookings";
-import ViewAvailability from "./components/ViewAvailability";
-import SubscriptionManagement from "./components/SubscriptionManagement";
-import GymOwnerDashBoard from "./components/GymOwnerDashBoard";
-import SubscriptionForm from "./components/SubscriptionForm"; 
-import GymOwnerLogin from "./components/GymOwnerLogin";
-import UnpaidClients from "./components/UnpaidClients"; 
-import AISuggestions from "./components/AISuggestions";
+import FirstPage from "./components/FirstPage.js";
+import SignUp from "./components/SignUp.js";
+import Login from "./components/Login.js";
+import Chat from "./components/Chat.js";
+import Availability from "./components/TrainerAvailability.js";
+import TrainerLogin from "./components/TrainerLogin.js";
+import Navbar from "./components/Navbar.js";
+import ProfileCard from "./components/ProfileCard.js";
+import PTCard from "./components/PtCard.js";
+import ResetPassword from "./components/ResetPassword.js";
+import WelcomePage from "./components/WelcomePage.js";
+import WorkoutPlan from "./components/WorkoutPlan.js";
+import AssignWorkout from "./components/AssignWorkout.js";
+import TrainerDashboard from "./components/TrainerDashboard.js";
+import ClientDashboard from "./components/ClientDashboard.js";
+import BookingsPage from "./components/BookingsPage.js";
+import ViewBookings from "./components/ViewBookings.js";
+import ViewAvailability from "./components/ViewAvailability.js";
+import SubscriptionManagement from "./components/SubscriptionManagement.js";
+import GymOwnerDashBoard from "./components/GymOwnerDashBoard.js";
+import SubscriptionForm from "./components/SubscriptionForm.js";
+import GymOwnerLogin from "./components/GymOwnerLogin.js";
+import UnpaidClients from "./components/UnpaidClients.js";
+import AISuggestions from "./components/AISuggestions.js";
+import TrainerManagement from "./components/TrainerManagement.js";
+import ChangePassword from "./components/ChangePassword.js";
+import PaymentHistory from "./components/PaymentHistory.js";
 
 function App() {
   console.log("App is rendering...");
@@ -61,23 +64,30 @@ function App() {
 
 // 🔹 Secure Route Protection
 const ProtectedRoute = ({ element, allowedRoles }) => {
-  const [userRole, setUserRole] = useState(localStorage.getItem("role"));
+  const [userRole, setUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedRole = localStorage.getItem("role");
-    setUserRole(storedRole);
-    setIsLoading(false); // ✅ Prevents premature redirection
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    
+    if (!token || !role) {
+      setUserRole(null);
+    } else {
+      setUserRole(role);
+    }
+    setIsLoading(false);
   }, []);
 
-  if (isLoading) return null; // ✅ Prevents redirecting before loading
+  if (isLoading) return null;
 
   if (!localStorage.getItem("token") || !allowedRoles.includes(userRole)) {
-    console.log("❌ Unauthorized access, redirecting...");
+    // Clear invalid authentication data
+    localStorage.clear();
     
-    if (userRole === "gymOwner") return <Navigate to="/gym-owner-login" />;
-    if (userRole === "trainer") return <Navigate to="/trainer-login" />;
-    
+    // Redirect based on the attempted role
+    if (allowedRoles.includes("gymOwner")) return <Navigate to="/gym-owner-login" />;
+    if (allowedRoles.includes("trainer")) return <Navigate to="/trainer-login" />;
     return <Navigate to="/login" />;
   }
 
@@ -114,8 +124,8 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
             <Route path="/view-bookings" element={<ProtectedRoute element={<ViewBookings />} allowedRoles={["client"]} />} />
             <Route path="/subscribe" element={<ProtectedRoute element={<SubscriptionForm />} allowedRoles={["client"]} />} />
             <Route path="/client-dashboard" element={<ProtectedRoute element={<ClientDashboard />} allowedRoles={["client"]} />} />
-            <Route path="/aisuggestions" element={<ProtectedRoute element={<AISuggestions />} allowedRoles={["client"]} />} />  
-
+            <Route path="/aisuggestions" element={<ProtectedRoute element={<AISuggestions />} allowedRoles={["client"]} />} />
+            <Route path="/payment-history" element={<ProtectedRoute element={<PaymentHistory />} allowedRoles={["client"]} />} />
           </>
         )}
 
@@ -138,6 +148,8 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
             <Route path="/gym-owner/dashboard" element={<ProtectedRoute element={<GymOwnerDashBoard />} allowedRoles={["gymOwner"]} />} />
             <Route path="/gym-owner/subscriptions" element={<ProtectedRoute element={<SubscriptionManagement />} allowedRoles={["gymOwner"]} />} />
             <Route path="/gym-owner/unpaid-clients" element={<ProtectedRoute element={<UnpaidClients />} allowedRoles={["gymOwner"]} />} />
+            <Route path="/gym-owner/manage-trainers" element={<ProtectedRoute element={<TrainerManagement />} allowedRoles={["gymOwner"]} />} />
+            <Route path="/gym-owner/change-password" element={<ProtectedRoute element={<ChangePassword />} allowedRoles={["gymOwner"]} />} />
           </>
         )}
 
