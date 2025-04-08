@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./GymOwnerDashboard.css";
+import { useNavigate } from "react-router-dom";
 
 const GymOwnerDashboard = () => {
   const [subscriptions, setSubscriptions] = useState([]);
   const [payments, setPayments] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Store token once to avoid repeated localStorage calls
   const token = localStorage.getItem("token");
@@ -15,9 +18,10 @@ const GymOwnerDashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null);
         // Use Promise.all for concurrent API calls
         const [subsRes, payRes] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/subscriptions`, { 
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/subscriptions/track`, { 
             headers: { Authorization: `Bearer ${token}` } 
           }),
           axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/payment`, { 
@@ -35,13 +39,22 @@ const GymOwnerDashboard = () => {
         calculateTotalRevenue(payRes.data);
       } catch (error) {
         console.error("Error loading dashboard:", error);
+        if (error.response?.status === 401) {
+          // Token expired or invalid
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
+          localStorage.removeItem("gymOwnerId");
+          navigate("/gym-owner/login");
+        } else {
+          setError("Failed to load dashboard data. Please try again later.");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [token]);
+  }, [token, navigate]);
 
   const calculateTotalRevenue = (payments) => {
     const total = payments.reduce((sum, payment) => sum + payment.amount, 0);
@@ -66,7 +79,11 @@ const GymOwnerDashboard = () => {
   };
 
   if (loading) {
-    return <div>Loading dashboard...</div>;
+    return <div className="loading">Loading dashboard...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
   }
 
   return (
@@ -106,8 +123,8 @@ const GymOwnerDashboard = () => {
             </thead>
             <tbody>
               {subscriptions.map((sub) => (
-                <tr key={sub.id}>
-                  <td>{sub.clientId.username}</td>
+                <tr key={`sub-${sub._id}`}>
+                  <td>{sub.clientId?.username || 'N/A'}</td>
                   <td>{sub.planType}</td>
                   <td>{new Date(sub.renewalDate).toLocaleDateString()}</td>
                   <td>
@@ -138,8 +155,8 @@ const GymOwnerDashboard = () => {
             </thead>
             <tbody>
               {payments.map((payment) => (
-                <tr key={payment.id}>
-                  <td>{payment.clientId.username}</td>
+                <tr key={`pay-${payment._id}`}>
+                  <td>{payment.clientId?.username || 'N/A'}</td>
                   <td>${payment.amount.toFixed(2)}</td>
                   <td>{payment.method}</td>
                   <td>{new Date(payment.paymentDate).toLocaleDateString()}</td>

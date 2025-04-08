@@ -133,7 +133,8 @@ const BookingsPage = () => {
                 setHasActiveSubscription(true);
                 setSubscriptionDetails({
                     ...response.data.subscription,
-                    remainingSessions: response.data.remainingSessions
+                    sessionsRemaining: response.data.subscription.sessionsRemaining,
+                    totalSessions: response.data.subscription.totalSessions
                 });
             } else {
                 setHasActiveSubscription(false);
@@ -169,25 +170,32 @@ const BookingsPage = () => {
                             })),
                         };
                     } catch (error) {
-                        if (error.response && error.response.status === 404) {
-                            // Only log if trainer object is valid
-                            if (trainer?.username) {
-                                console.log(`Trainer ${trainer.username} has not set any availability yet.`);
-                            }
-                        } else {
-                            console.error(`Error fetching availability for ${trainer?.username || trainer?._id || "unknown"}:`,
-                                error.response?.data || error.message);
+                        // Silently handle 404 errors for missing availability
+                        if (error.response?.status === 404) {
+                            return { ...trainer, availability: [] };
                         }
+                        // Log other errors but don't show them to the user
+                        console.error(`Error fetching availability for ${trainer?.username || trainer?._id || "unknown"}:`,
+                            error.response?.data || error.message);
                         return { ...trainer, availability: [] };
                     }
                 })
             );
 
-            setTrainers(trainersData);
+            // Filter out trainers with no availability
+            const availableTrainers = trainersData.filter(trainer => trainer.availability.length > 0);
+            
+            if (availableTrainers.length === 0) {
+                setError('No trainers have set their availability yet. Please check back later.');
+            } else {
+                setError(null);
+            }
+
+            setTrainers(availableTrainers);
             setLoading(false);
         } catch (error) {
-            console.error("Error fetching trainers:", error);
-            setError("Failed to load trainers.");
+            console.error('Error fetching trainers:', error);
+            setError('Failed to load trainers');
             setLoading(false);
         }
     };
@@ -304,6 +312,11 @@ const BookingsPage = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
+            // Update subscription details if using subscription
+            if (finalPaymentMethod === "subscription" && response.data.subscription) {
+                setSubscriptionDetails(response.data.subscription);
+            }
+
             alert(`✅ ${response.data.message}`);
             fetchClientBookings();
             checkSubscriptionStatus();
@@ -394,7 +407,7 @@ const BookingsPage = () => {
                         <p>Loading trainers...</p>
                     ) : error ? (
                         <p className="bp-error">{error}</p>
-                    ) : (
+                    ) : trainers.length > 0 ? (
                         <div className="bp-trainers-grid">
                             {trainers.map((trainer) => (
                                 <div
@@ -423,6 +436,10 @@ const BookingsPage = () => {
                                 </div>
                             ))}
                         </div>
+                    ) : (
+                        <div className="bp-no-trainers">
+                            <p>No trainers are currently available. Please check back later.</p>
+                        </div>
                     )}
                 </div>
             )}
@@ -447,7 +464,7 @@ const BookingsPage = () => {
 
                                 <div className="bp-subscription-info">
                                     <p>Your subscription plan: <strong>{subscriptionDetails?.planType || 'Basic'}</strong></p>
-                                    <p>Sessions remaining this month: <strong>{subscriptionDetails?.remainingSessions || 0}</strong></p>
+                                    <p>Sessions remaining this month: <strong>{subscriptionDetails?.sessionsRemaining || 0}</strong></p>
                                 </div>
 
                                 <div className="bp-subscription-buttons">

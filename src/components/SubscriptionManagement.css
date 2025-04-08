@@ -1,67 +1,106 @@
 /* SubscriptionManagement.css */
-.container {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 15px;
-  }
-  
-  .search-container {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-  }
-  
-  .search-input {
-    padding: 8px;
-    width: 200px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .clear-btn, .reset-btn {
-    padding: 8px 12px;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  
-  .clear-btn {
-    background-color: #ff6666;
-    color: white;
-  }
-  
-  .reset-btn {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  .client-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-  
-  .client-table th, .client-table td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
-  }
-  
-  .client-table th {
-    background-color: #f4f4f4;
-  }
-  
-  .status-active {
-    color: green;
-    font-weight: bold;
-  }
-  
-  .status-expired {
-    color: red;
-    font-weight: bold;
-  }
+.subscription-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.subscription-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.search-input {
+  padding: 8px;
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.clear-btn, .reset-btn {
+  padding: 8px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.clear-btn {
+  background-color: #ff6666;
+  color: white;
+}
+
+.reset-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.subscription-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.subscription-table th, .subscription-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.subscription-table th {
+  background-color: #f4f4f4;
+}
+
+.status-active {
+  color: green;
+  font-weight: bold;
+}
+
+.status-expired {
+  color: red;
+  font-weight: bold;
+}
+
+.loading {
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  color: #555;
+}
+
+.error {
+  padding: 20px;
+  text-align: center;
+  color: red;
+  font-size: 18px;
+}
+
+.empty-state {
+  padding: 20px;
+  text-align: center;
+  color: #555;
+  font-style: italic;
+}
+
+.cancel-btn, .renew-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.cancel-btn {
+  background-color: #ff6666;
+  color: white;
+}
+
+.renew-btn {
+  background-color: #4CAF50;
+  color: white;
+}

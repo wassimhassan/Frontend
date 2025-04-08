@@ -10,8 +10,16 @@ const ViewBookings = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [notification, setNotification] = useState(null);
-  const [feedbackModal, setFeedbackModal] = useState({ isOpen: false, bookingId: null });
-  const [feedbackData, setFeedbackData] = useState({ rating: 5, comment: "" });
+  const [feedbackModal, setFeedbackModal] = useState({ 
+    isOpen: false, 
+    bookingId: null,
+    trainerName: ""
+  });
+  const [feedbackData, setFeedbackData] = useState({ 
+    rating: 5, 
+    comment: "" 
+  });
+  const [feedbackErrors, setFeedbackErrors] = useState({});
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
   const [canceling, setCanceling] = useState(null);
   
@@ -95,27 +103,73 @@ const ViewBookings = () => {
     }
   };
 
-  // ✅ Open feedback modal
+  // ✅ Open feedback modal with trainer name for better context
   const openFeedbackModal = (bookingId) => {
-    setFeedbackModal({ isOpen: true, bookingId });
+    const booking = bookings.find(b => b._id === bookingId);
+    if (!booking) return;
+    
+    setFeedbackModal({ 
+      isOpen: true, 
+      bookingId,
+      trainerName: booking.trainerId.username 
+    });
     setFeedbackData({ rating: 5, comment: "" });
+    setFeedbackErrors({});
+    
+    // Add no-scroll class to body when modal is open
+    document.body.classList.add('vb-no-scroll');
   };
 
   // ✅ Close feedback modal
   const closeFeedbackModal = () => {
-    setFeedbackModal({ isOpen: false, bookingId: null });
+    setFeedbackModal({ isOpen: false, bookingId: null, trainerName: "" });
+    setFeedbackErrors({});
+    
+    // Remove no-scroll class when modal is closed
+    document.body.classList.remove('vb-no-scroll');
   };
 
-  // ✅ Handle feedback form changes
+  // ✅ Handle feedback form changes with validation
   const handleFeedbackChange = (e) => {
     const { name, value } = e.target;
     setFeedbackData({ ...feedbackData, [name]: value });
+    
+    // Clear error when user starts typing
+    if (feedbackErrors[name]) {
+      setFeedbackErrors({
+        ...feedbackErrors,
+        [name]: null
+      });
+    }
   };
 
-  // ✅ Submit feedback
+  // Validate feedback before submission
+  const validateFeedback = () => {
+    const errors = {};
+    
+    // Rating validation (should be between 1-5)
+    if (feedbackData.rating < 1 || feedbackData.rating > 5) {
+      errors.rating = "Please select a rating from 1 to 5 stars";
+    }
+    
+    // For low ratings (1-2), require comment
+    if (feedbackData.rating <= 2 && (!feedbackData.comment || feedbackData.comment.trim() === "")) {
+      errors.comment = "Please provide details about your experience";
+    }
+    
+    setFeedbackErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Submit feedback with validation
   const submitFeedback = async (e) => {
     e.preventDefault();
     if (!feedbackModal.bookingId) return;
+    
+    // Validate before submission
+    if (!validateFeedback()) {
+      return;
+    }
     
     setSubmittingFeedback(true);
     try {
@@ -125,21 +179,32 @@ const ViewBookings = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      // Update the booking in state to show feedback is provided
+      // Update the booking in state to show feedback is provided and store the feedback
       setBookings(bookings.map(booking => 
         booking._id === feedbackModal.bookingId 
-          ? { ...booking, feedbackProvided: true } 
+          ? { 
+              ...booking, 
+              feedbackProvided: true,
+              feedback: { ...feedbackData } // Store the feedback data for potential display later
+            } 
           : booking
       ));
       
-      showNotification("Feedback submitted successfully!");
+      showNotification("Thank you! Your feedback has been submitted.");
       closeFeedbackModal();
     } catch (error) {
       console.error("Error submitting feedback:", error);
-      showNotification(
-        error.response?.data?.message || "Failed to submit feedback.", 
-        "error"
-      );
+      
+      // More specific error handling
+      if (error.response?.status === 429) {
+        showNotification("You've already provided feedback for this session.", "error");
+        closeFeedbackModal();
+      } else {
+        showNotification(
+          error.response?.data?.message || "Failed to submit feedback. Please try again.", 
+          "error"
+        );
+      }
     } finally {
       setSubmittingFeedback(false);
     }
@@ -220,14 +285,14 @@ const ViewBookings = () => {
 
       {/* ✅ Show bookings */}
       {!loading && (!bookings || bookings.length === 0) ? (
-  <p className="vb-no-bookings">
-    {filter === "upcoming" 
-      ? "You have no upcoming sessions." 
-      : filter === "past" 
-        ? "You have no past sessions." 
-        : "You have no bookings."}
-  </p>
-) : (
+        <p className="vb-no-bookings">
+          {filter === "upcoming" 
+            ? "You have no upcoming sessions." 
+            : filter === "past" 
+              ? "You have no past sessions." 
+              : "You have no bookings."}
+        </p>
+      ) : (
         <>
           <div className="vb-bookings-list">
             {bookings.map((booking) => {
@@ -261,16 +326,30 @@ const ViewBookings = () => {
                   {isPast && (
                     <div className="vb-past-session">
                       <span>{booking.completed ? "Session Completed" : "Session Time Passed"}</span>
-                      {!booking.feedbackProvided && (
+                      
+                      {/* Display feedback section conditionally */}
+                      {!booking.feedbackProvided ? (
                         <button 
                           className="vb-feedback-btn"
                           onClick={() => openFeedbackModal(booking._id)}
                         >
-                          Leave Feedback
+                          Rate this Session
                         </button>
-                      )}
-                      {booking.feedbackProvided && (
-                        <span className="vb-feedback-provided">Feedback Provided</span>
+                      ) : (
+                        <div className="vb-feedback-provided-container">
+                          <span className="vb-feedback-provided">Feedback Provided</span>
+                          {booking.feedback && (
+                            <div className="vb-feedback-summary">
+                              <div className="vb-star-display">
+                                {[1, 2, 3, 4, 5].map(star => (
+                                  <span key={star} className={`vb-star-small ${booking.feedback.rating >= star ? 'active' : ''}`}>
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}
@@ -302,14 +381,17 @@ const ViewBookings = () => {
         </>
       )}
 
-      {/* ✅ Feedback Modal */}
+      {/* ✅ Enhanced Feedback Modal */}
       {feedbackModal.isOpen && (
-        <div className="vb-modal-overlay">
-          <div className="vb-modal">
-            <h3>Leave Feedback</h3>
+        <div className="vb-modal-overlay" onClick={closeFeedbackModal}>
+          <div className="vb-modal" onClick={e => e.stopPropagation()}>
+            <button className="vb-modal-close" onClick={closeFeedbackModal}>×</button>
+            <h3>Rate Your Session with {feedbackModal.trainerName}</h3>
+            <p className="vb-modal-subtitle">Your feedback helps trainers improve their services</p>
+            
             <form onSubmit={submitFeedback}>
               <div className="vb-form-group">
-                <label>Rating (1-5):</label>
+                <label>How was your experience?</label>
                 <div className="vb-rating">
                   {[1, 2, 3, 4, 5].map(star => (
                     <button
@@ -317,21 +399,45 @@ const ViewBookings = () => {
                       type="button"
                       className={`vb-star ${feedbackData.rating >= star ? 'active' : ''}`}
                       onClick={() => setFeedbackData({...feedbackData, rating: star})}
+                      aria-label={`${star} star${star !== 1 ? 's' : ''}`}
                     >
-                      ★
+                      <span className="vb-star-icon">★</span>
+                      <span className="vb-star-label">
+                        {star === 1 && 'Poor'}
+                        {star === 2 && 'Fair'}
+                        {star === 3 && 'Good'}
+                        {star === 4 && 'Great'}
+                        {star === 5 && 'Excellent'}
+                      </span>
                     </button>
                   ))}
                 </div>
+                {feedbackErrors.rating && (
+                  <div className="vb-form-error">{feedbackErrors.rating}</div>
+                )}
               </div>
+              
               <div className="vb-form-group">
-                <label>Comments (optional):</label>
+                <label>
+                  Share your experience {feedbackData.rating <= 2 ? '(required)' : '(optional)'}:
+                </label>
                 <textarea
                   name="comment"
                   value={feedbackData.comment}
                   onChange={handleFeedbackChange}
                   rows="4"
+                  placeholder={
+                    feedbackData.rating <= 2 
+                      ? "Please tell us what went wrong and how we can improve" 
+                      : "Share any additional thoughts about your session"
+                  }
+                  className={feedbackErrors.comment ? "vb-input-error" : ""}
                 ></textarea>
+                {feedbackErrors.comment && (
+                  <div className="vb-form-error">{feedbackErrors.comment}</div>
+                )}
               </div>
+              
               <div className="vb-modal-actions">
                 <button 
                   type="button" 

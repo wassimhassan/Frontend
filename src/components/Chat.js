@@ -281,42 +281,41 @@ const Chat = () => {
       console.log('Empty message, not sending');
       return;
     }
-    
+  
     if (!selectedUser) {
       setError('Please select a user to chat with');
       return;
     }
-    
+  
     if (!socket) {
       setError('Chat connection not established. Please refresh the page.');
       return;
     }
-
+  
     if (!isValidConnection()) {
       return;
     }
-
-    // Use either id or _id based on what's available
+  
     const selectedUserId = selectedUser.id || selectedUser._id;
-    
+  
     // Log but don't block on ObjectId validation
     if (selectedUserId && selectedUserId.length === 24 && !isValidObjectId(selectedUserId)) {
       console.warn('Selected user ID may be invalid for message:', selectedUserId);
     }
-
+  
     setLoading(prev => ({ ...prev, send: true }));
     setError(null);
-
+  
     const messageData = {
       sender: userId,
       receiver: selectedUserId,
       text: newMessage,
       timestamp: new Date().toISOString()
     };
-
+  
     try {
       console.log('Sending message:', messageData);
-      
+  
       // Send via REST API for persistence
       const response = await axios.post(`${API_BASE_URL}/api/chat/send`, messageData, {
         headers: { 
@@ -324,23 +323,26 @@ const Chat = () => {
           'Content-Type': 'application/json'
         }
       });
-
+  
       console.log('Message sent response:', response.data);
-
-      // Emit via Socket for real-time
-      socket.emit('sendMessage', messageData);
-
-      // Optimistically update messages with the saved message from the server
+  
+      // Update the state with the message data only once from the API response
       const savedMessage = response.data.data || messageData;
+  
+      // Emit the message via Socket for real-time delivery
+      socket.emit('sendMessage', savedMessage);
+  
+      // Update the message state only once
       setMessages(prevMessages => [...prevMessages, savedMessage]);
+  
       setNewMessage('');
     } catch (error) {
       console.error('Message send failed:', error);
       const errorMsg = error.response?.data?.message || 
-                      error.response?.data?.details || 
-                      'Failed to send message. Please try again.';
+                        error.response?.data?.details || 
+                        'Failed to send message. Please try again.';
       setError(errorMsg);
-      
+  
       // Only redirect on 401 errors
       if (error.response?.status === 401) {
         handleLogout();
@@ -348,7 +350,7 @@ const Chat = () => {
     } finally {
       setLoading(prev => ({ ...prev, send: false }));
     }
-  };
+  };    
 
   // Handle message input and typing
   const handleMessageChange = (e) => {

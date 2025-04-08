@@ -2,21 +2,29 @@
   "name": "cmps271",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
+    "@babel/runtime": "^7.24.0",
+    "@socket.io/component-emitter": "^3.1.0",
     "@stripe/react-stripe-js": "^3.4.0",
     "@stripe/stripe-js": "^6.1.0",
-    "axios": "^1.7.9",
+    "@wojtekmaj/date-utils": "^1.0.0",
+    "axios": "^1.8.4",
+    "canvg": "^4.0.1",
+    "clsx": "^2.1.0",
     "cmps271": "file:../Frontend",
-    "cra-template": "1.2.0",
+    "dompurify": "^3.0.3",
+    "engine.io-client": "^6.5.4",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
-    "react": "^19.0.0",
+    "react": "^18.2.0",
     "react-calendar": "^5.1.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.5",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.1",
     "react-scripts": "5.0.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
+    "socket.io-parser": "^4.2.4",
     "web-vitals": "^4.2.4"
   },
   "scripts": {
@@ -44,6 +52,11 @@
     ]
   },
   "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/plugin-syntax-import-meta": "^7.10.4",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
+    "confusing-browser-globals": "^1.0.11",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.4"
   }
