@@ -1,14 +1,4 @@
-.assign-container {
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-.workout-container {
+.assign-workout {
   max-width: 800px;
   margin: auto;
   padding: 20px;
@@ -17,131 +7,154 @@
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-h2, h3 {
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+h2, h3, h4 {
   color: #333;
   margin-bottom: 15px;
-  text-align: center;
+}
+
+h2 {
+  margin: 0;
 }
 
 .input-field {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   margin-top: 5px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  font-size: 1rem;
 }
 
-.exercise-list {
-  margin-top: 15px;
+/* Client selection section */
+.clients-section {
+  margin-bottom: 25px;
 }
 
+.clients-section h3 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.clients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.client-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.client-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-color: #4caf50;
+}
+
+.client-card.selected {
+  border: 2px solid #4caf50;
+  background-color: #e8f5e9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+}
+
+.client-info h4 {
+  margin: 0 0 10px 0;
+  color: #444;
+}
+
+.client-info p {
+  margin: 5px 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.client-card.selected .client-info h4 {
+  color: #2e7d32;
+}
+
+.client-card.selected .client-info p {
+  color: #1b5e20;
+}
+
+.selected-count {
+  background-color: #4caf50;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  margin-left: 10px;
+  display: inline-block;
+}
+
+/* Exercise section */
 .exercise-card {
-  background: #ffffff;
+  background: #f9f9f9;
   padding: 15px;
   margin: 10px 0;
   border-radius: 8px;
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.exercise-card .input-field {
+  margin-bottom: 0;
 }
 
 button {
-  padding: 10px 15px;
+  padding: 12px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  margin: 10px 5px;
-  transition: background 0.3s ease;
+  margin: 15px 5px;
+  transition: all 0.3s ease;
+  font-size: 1rem;
 }
 
 button:hover {
   opacity: 0.9;
+  transform: translateY(-2px);
 }
 
-.add-btn {
+/* Add exercise button - green */
+.add-exercise-btn {
   background: #28a745;
   color: white;
 }
 
-.remove-btn {
-  background: #dc3545;
-  color: white;
-}
-
+/* Submit button - blue */
 .submit-btn {
   background: #007bff;
   color: white;
-}
-
-.message {
-  margin-top: 10px;
-  font-weight: bold;
-  color: green;
-}
-
-/* 💪 Workout List Section */
-.workout-list {
-  list-style: none;
-  padding-left: 0;
+  width: 100%;
   margin-top: 20px;
-}
-
-.workout-list li {
-  background: #f7f7f7;
-  margin-bottom: 15px;
   padding: 15px;
-  border-radius: 8px;
-  text-align: left;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  font-size: 1.1rem;
+  text-transform: uppercase;
 }
 
-.workout-list li ul {
-  padding-left: 20px;
-  margin-top: 10px;
-}
-
-.workout-list li ul li {
-  margin-bottom: 5px;
-  font-size: 0.95rem;
-}
-
-.client-card {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
-
-.client-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-color: #4caf50;
-}
-
-.client-card.selected {
-    border: 2px solid #4caf50;
-    background-color: #e8f5e9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
-}
-
-.client-card.selected .client-info h4 {
-    color: #2e7d32;
-}
-
-.client-card.selected .client-info p {
-    color: #1b5e20;
-}
-
-.selected-count {
-    background-color: #4caf50;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 0.9rem;
-    margin-left: 10px;
-    display: inline-block;
+/* Logout button - red */
+.logout-btn {
+  background: #dc3545;
+  color: white;
+  margin: 0;
 }
