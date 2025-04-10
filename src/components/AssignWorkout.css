@@ -104,3 +104,44 @@ button:hover {
   margin-bottom: 5px;
   font-size: 0.95rem;
 }
+
+.client-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.client-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-color: #4caf50;
+}
+
+.client-card.selected {
+    border: 2px solid #4caf50;
+    background-color: #e8f5e9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+}
+
+.client-card.selected .client-info h4 {
+    color: #2e7d32;
+}
+
+.client-card.selected .client-info p {
+    color: #1b5e20;
+}
+
+.selected-count {
+    background-color: #4caf50;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    margin-left: 10px;
+    display: inline-block;
+}

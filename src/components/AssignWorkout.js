@@ -4,7 +4,7 @@ import "./AssignWorkout.css";
 
 function AssignWorkout() {
   const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState("");
+  const [selectedClients, setSelectedClients] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [exercises, setExercises] = useState([{ name: "", sets: "", reps: "", rest: "" }]);
@@ -48,9 +48,17 @@ function AssignWorkout() {
     fetchAssignedWorkouts();
   }, [token]);
 
+  const handleClientSelect = (clientId) => {
+    if (selectedClients.includes(clientId)) {
+      setSelectedClients(selectedClients.filter((id) => id !== clientId));
+    } else {
+      setSelectedClients([...selectedClients, clientId]);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!selectedClient || !title.trim() || exercises.length === 0) {
-      alert("Please fill in all fields and choose a client.");
+    if (selectedClients.length === 0 || !title.trim() || exercises.length === 0) {
+      alert("Please fill in all fields and choose at least one client.");
       return;
     }
 
@@ -63,7 +71,7 @@ function AssignWorkout() {
         reps: parseInt(ex.reps),
         rest: parseInt(ex.rest),
       })),
-      assignedClients: [selectedClient],
+      assignedClients: selectedClients,
     };
 
     try {
@@ -76,7 +84,7 @@ function AssignWorkout() {
 
       alert("✅ Workout Plan Assigned!");
       // Reset form
-      setSelectedClient("");
+      setSelectedClients([]);
       setTitle("");
       setDescription("");
       setExercises([{ name: "", sets: "", reps: "", rest: "" }]);
@@ -92,22 +100,36 @@ function AssignWorkout() {
   };
 
   return (
-    <div className="workout-container">
+    <div className="assign-workout">
       <h2>Assign Workout Plan</h2>
-
-      <label>Select Client:</label>
-      <select
-        className="input-field"
-        value={selectedClient}
-        onChange={(e) => setSelectedClient(e.target.value)}
-      >
-        <option value="">-- Select Client --</option>
-        {clients.map((client) => (
-          <option key={client._id} value={client._id}>
-            {client.name}
-          </option>
-        ))}
-      </select>
+      
+      <div className="clients-section">
+        <h3>
+          Select Clients 
+          {selectedClients.length > 0 && (
+            <span className="selected-count">
+              {selectedClients.length} selected
+            </span>
+          )}
+        </h3>
+        <div className="clients-grid">
+          {clients.map(client => (
+            <div 
+              key={client._id} 
+              className={`client-card ${selectedClients.includes(client._id) ? 'selected' : ''}`}
+              onClick={() => handleClientSelect(client._id)}
+            >
+              <div className="client-info">
+                <h4>{client.username}</h4>
+                <p>Email: {client.email}</p>
+                {client.lastSession && (
+                  <p>Last Session: {new Date(client.lastSession).toLocaleDateString()}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <label>Workout Title:</label>
       <input
