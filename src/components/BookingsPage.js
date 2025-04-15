@@ -9,7 +9,7 @@ import "./bookingsPage.css";
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
 // Payment form component
-const PaymentForm = ({ amount, onSuccess, onError }) => {
+const PaymentForm = ({ amount, bookingId, onSuccess, onError }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [loading, setLoading] = useState(false);
@@ -40,24 +40,37 @@ const PaymentForm = ({ amount, onSuccess, onError }) => {
         }
 
         try {
+            const paymentData = {
+                amount,
+                paymentMethodId: paymentMethod.id,
+                // Include booking ID if we're paying for a specific booking
+                ...(bookingId && { bookingId: bookingId }) // Fixed: removed props reference
+            };
             // Process payment with backend
             const response = await axios.post(
                 `${process.env.REACT_APP_BACKEND_URL}/api/payment/stripe`,
-                {
-                    amount,
-                    paymentMethodId: paymentMethod.id,
-                },
+                paymentData,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
 
-            // Handle successful payment
-            onSuccess(response.data);
+            // Handle successful payment - fix to safely handle response
+            if (response && response.data) {
+                onSuccess(response.data);
+            } else {
+                // Handle empty but successful response
+                onSuccess({ success: true });
+            }
             setLoading(false);
         } catch (error) {
-            setError(error.response?.data?.error || "Payment processing failed");
-            onError(error.response?.data?.error || "Payment processing failed");
+            console.error("❌ Payment Failed:", error);
+            // Safer error handling
+            const errorMessage = error.response?.data?.error ||
+                error.message ||
+                "Payment processing failed";
+            setError(errorMessage);
+            onError(errorMessage);
             setLoading(false);
         }
     };
@@ -110,6 +123,7 @@ const BookingsPage = () => {
     const [paymentProcessing, setPaymentProcessing] = useState(false);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [showStripeForm, setShowStripeForm] = useState(false);
+    const [currentBookingId, setCurrentBookingId] = useState(null); // Added missing state variable
     const token = localStorage.getItem("token");
     const clientId = localStorage.getItem("userId");
     const [showSubscriptionChoice, setShowSubscriptionChoice] = useState(false);
@@ -184,7 +198,7 @@ const BookingsPage = () => {
 
             // Filter out trainers with no availability
             const availableTrainers = trainersData.filter(trainer => trainer.availability.length > 0);
-            
+
             if (availableTrainers.length === 0) {
                 setError('No trainers have set their availability yet. Please check back later.');
             } else {
@@ -298,10 +312,18 @@ const BookingsPage = () => {
             return;
         }
 
+        // Create a Date object from the time
+        const sessionDate = new Date(time);
+
+        // Extract date and time parts to match the model's expected format
         const requestData = {
             trainerId,
             clientId,
-            sessionTime: new Date(time).toISOString(),
+            // Keep the original sessionTime for backward compatibility
+            sessionTime: sessionDate.toISOString(),
+            // Add separate date and time fields that the model expects
+            date: sessionDate.toISOString().split('T')[0],  // YYYY-MM-DD format
+            time: sessionDate.toISOString().split('T')[1].substring(0, 8),  // HH:MM:SS format
             paymentMethod: finalPaymentMethod || paymentMethod
         };
 
@@ -361,6 +383,7 @@ const BookingsPage = () => {
         setBookingStep(1);
         setPaymentSuccess(false);
         setShowStripeForm(false);
+        setCurrentBookingId(null); // Reset the current booking ID
     };
 
     // Format date for display - enhanced with detailed date
@@ -538,8 +561,7 @@ const BookingsPage = () => {
                                                         <button
                                                             key={i}
                                                             onClick={() => handleSelectSession(selectedTrainer._id, slot.day, time)}
-                                                            className={`bp-time-slot ${isBooked ? "bp-booked" : ""
-                                                                }`}
+                                                            className={`bp-time-slot ${isBooked ? "bp-booked" : ""}`}
                                                             disabled={isBooked}
                                                         >
                                                             {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -564,10 +586,10 @@ const BookingsPage = () => {
                                 slot.time.length > 0 &&
                                 slot.time.some(time => isSessionAvailable(selectedTrainer._id, time))
                             ).length === 0 && (
-                                    <div className="bp-no-availability">
-                                        <p>This trainer has no available future time slots.</p>
-                                    </div>
-                                )}
+                                <div className="bp-no-availability">
+                                    <p>This trainer has no available future time slots.</p>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <p className="bp-no-availability">This trainer has not set their availability.</p>
@@ -647,6 +669,7 @@ const BookingsPage = () => {
                             <Elements stripe={stripePromise}>
                                 <PaymentForm
                                     amount={getSessionCost()}
+                                    bookingId={currentBookingId} // Use the stored booking ID here
                                     onSuccess={handlePaymentSuccess}
                                     onError={handlePaymentError}
                                 />
@@ -688,10 +711,10 @@ const BookingsPage = () => {
                                 <li
                                     key={booking._id}
                                     className={`
-                            bp-booking-item 
-                            ${!isPaid && isUpcoming ? 'bp-booking-unpaid' : ''}
-                            ${!isUpcoming ? 'bp-booking-past' : ''}
-                        `}
+                                        bp-booking-item 
+                                        ${!isPaid && isUpcoming ? 'bp-booking-unpaid' : ''}
+                                        ${!isUpcoming ? 'bp-booking-past' : ''}
+                                    `}
                                 >
                                     <div className="bp-booking-trainer">
                                         <strong>{booking.trainerId?.username || "Trainer (Deleted)"}</strong>
@@ -713,8 +736,8 @@ const BookingsPage = () => {
                                             <div className="bp-payment-actions">
                                                 <span className="bp-payment-warning">Payment Due</span>
                                                 <button
-                                                    className="bp-pay-now-button"
                                                     onClick={() => {
+                                                        // Set up the payment process
                                                         setSelectedSession({
                                                             trainerId: booking.trainerId?._id || booking.trainerId,
                                                             time: new Date(booking.sessionTime)
@@ -722,6 +745,9 @@ const BookingsPage = () => {
                                                         setPaymentMethod("creditCard");
                                                         setShowStripeForm(true);
                                                         setBookingStep(3);
+
+                                                        // Store the currently selected booking ID
+                                                        setCurrentBookingId(booking._id);
                                                     }}
                                                 >
                                                     Pay Now

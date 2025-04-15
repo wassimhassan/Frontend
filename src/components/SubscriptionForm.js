@@ -45,7 +45,7 @@ const StripeSubscriptionForm = ({
             const subscriptionData = {
                 planType,
                 endDate,
-                method: "stripe",
+                method: "stripe", // Payment method is always Stripe now
                 transactionId: paymentMethod.id,
                 paymentMethodId: paymentMethod.id
             };
@@ -86,7 +86,6 @@ const StripeSubscriptionForm = ({
 const SubscriptionForm = () => {
     const [planType, setPlanType] = useState("basic");
     const [endDate, setEndDate] = useState("");
-    const [method, setMethod] = useState("stripe");
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
@@ -156,7 +155,7 @@ const SubscriptionForm = () => {
         }
     }, [token, navigate]);
 
-    const handleCashPayment = async () => {
+    const handleSubmit = async () => {
         setLoading(true);
         setErrorMessage("");
         setSuccessMessage("");
@@ -171,26 +170,26 @@ const SubscriptionForm = () => {
         const subscriptionData = {
             planType,
             endDate,
-            method: "cash",
+            method: "stripe", // Always Stripe
             price: planPrice
         };
 
         try {
             const response = await axios.post(
-                `${process.env.REACT_APP_BACKEND_URL}/api/payment/accept-cash-payment`,
+                `${process.env.REACT_APP_BACKEND_URL}/api/payment/accept-stripe-payment`,
                 subscriptionData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            setSuccessMessage("Cash payment pending. Please complete payment at the gym.");
+            setSuccessMessage("Subscription processed successfully!");
             setTimeout(() => {
-                navigate("/cash-payment-instructions");
+                navigate("/subscriptions");
             }, 2000);
 
             setLoading(false);
         } catch (error) {
-            console.error("Cash Payment Error:", error.response?.data);
-            setErrorMessage(error.response?.data?.message || "Payment failed. Try again.");
+            console.error("Error processing subscription:", error.response?.data);
+            setErrorMessage(error.response?.data?.message || "Subscription failed. Try again.");
             setLoading(false);
         }
     };
@@ -226,51 +225,26 @@ const SubscriptionForm = () => {
                 />
             </div>
 
-            <div className="form-group">
-                <label>Payment Method:</label>
-                <select
-                    value={method}
-                    onChange={(e) => setMethod(e.target.value)}
-                    required
-                >
-                    <option value="stripe">Credit Card (Stripe)</option>
-                    <option value="cash">Cash (Gym Payment)</option>
-                </select>
-            </div>
-
             <div className="price-summary">
                 <p>Selected Plan: {planType.charAt(0).toUpperCase() + planType.slice(1)}</p>
                 <p>Monthly Price: ${planPrice}</p>
             </div>
 
-            {method === "stripe" ? (
-                <Elements stripe={stripePromise}>
-                    <StripeSubscriptionForm
-                        planType={planType}
-                        planPrice={planPrice}
-                        endDate={endDate}
-                        onSubmitSuccess={(message) => {
-                            setSuccessMessage(message);
-                            setTimeout(() => {
-                                navigate("/payments");
-                            }, 2000);
-                        }}
-                        onError={(error) => setErrorMessage(error)}
-                    />
-                </Elements>
-            ) : (
-                <button
-                    onClick={handleCashPayment}
-                    disabled={loading || isSubscriptionButtonDisabled}  // Disable if already subscribed
-                    >
-                    {loading ? "Processing..." : "Submit Cash Payment"}
-                </button>
-            )}
-            {method === "cash" && amountDue !== null && (
-                <div className="amount-due">
-                    <p>💰 <strong>Amount Due:</strong> ${amountDue}</p>
-                </div>
-            )}
+            <Elements stripe={stripePromise}>
+                <StripeSubscriptionForm
+                    planType={planType}
+                    planPrice={planPrice}
+                    endDate={endDate}
+                    onSubmitSuccess={(message) => {
+                        setSuccessMessage(message);
+                        setTimeout(() => {
+                            navigate("/subscriptions");
+                        }, 2000);
+                    }}
+                    onError={(error) => setErrorMessage(error)}
+                />
+            </Elements>
+
             {errorMessage && <p className="error">{errorMessage}</p>}
             {successMessage && <p className="success">{successMessage}</p>}
         </div>

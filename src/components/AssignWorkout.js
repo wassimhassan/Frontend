@@ -208,26 +208,6 @@ function AssignWorkout() {
       </button>
 
       <hr />
-
-      <h3>📋 Previously Assigned Workouts</h3>
-      <ul className="workout-list">
-        {assignedWorkouts.length === 0 ? (
-          <p>No workouts assigned yet.</p>
-        ) : (
-          assignedWorkouts.map((workout) => (
-            <li key={workout._id}>
-              <strong>{workout.title}</strong> - {workout.description}
-              <ul>
-                {workout.exercises.map((ex, i) => (
-                  <li key={i}>
-                    {ex.name} — {ex.sets} sets × {ex.reps} reps, Rest: {ex.rest}s
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))
-        )}
-      </ul>
     </div>
   );
 }

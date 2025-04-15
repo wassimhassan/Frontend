@@ -1,47 +1,202 @@
 .client-dashboard {
-    max-width: 600px;
-    margin: auto;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-  }
-  
-  h2 {
-    color: #333;
-    margin-bottom: 15px;
-  }
-  
-  .plan-card {
-    background: white;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.client-dashboard h2 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 24px;
+}
+
+.plan-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.plan-card.completed {
+  border-left: 4px solid #28a745;
+  background-color: #f8fff8;
+}
+
+.plan-card h3 {
+  color: #007bff;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+.plan-card p {
+  color: #555;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.completion-badge {
+  display: inline-block;
+  background-color: #28a745;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  margin: 10px 0;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.exercise-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  margin-top: 15px;
+}
+
+.exercise-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  margin: 8px 0;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.exercise-item.completed {
+  background-color: #e8f5e9;
+  border-color: #c3e6cb;
+}
+
+.exercise-info {
+  flex-grow: 1;
+  font-size: 15px;
+  color: #333;
+}
+
+.exercise-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.complete-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.complete-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.complete-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.completed-badge {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.completed-badge::before {
+  content: "✓";
+  font-size: 16px;
+}
+
+.workout-complete-btn {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  margin: 20px auto 0;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: 16px;
+  text-align: center;
+}
+
+.workout-complete-btn:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.workout-complete-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.error {
+  color: #dc3545;
+  text-align: center;
+  padding: 20px;
+  background-color: #f8d7da;
+  border-radius: 8px;
+  margin: 20px 0;
+  border: 1px solid #f5c6cb;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .client-dashboard {
     padding: 15px;
-    margin: 10px 0;
-    border-radius: 8px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-    text-align: left;
   }
-  
-  .plan-card h3 {
-    margin: 5px 0;
-    color: #007bff;
-  }
-  
-  .plan-card p {
-    margin: 5px 0;
-    color: #555;
-  }
-  
-  .exercise-list {
-    list-style-type: none;
-    padding: 0;
-  }
-  
+
   .exercise-item {
-    background: #e6f7ff;
-    padding: 8px;
-    margin: 5px 0;
-    border-radius: 5px;
-    font-size: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
-  
+
+  .exercise-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .complete-btn {
+    width: 48%;
+  }
+
+  .workout-complete-btn {
+    width: 100%;
+    max-width: none;
+  }
+}

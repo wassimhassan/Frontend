@@ -124,6 +124,7 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
             <Route path="/view-bookings" element={<ProtectedRoute element={<ViewBookings />} allowedRoles={["client"]} />} />
             <Route path="/subscribe" element={<ProtectedRoute element={<SubscriptionForm />} allowedRoles={["client"]} />} />
             <Route path="/client-dashboard" element={<ProtectedRoute element={<ClientDashboard />} allowedRoles={["client"]} />} />
+            <Route path="/workout-plan" element={<ProtectedRoute element={<WorkoutPlan />} allowedRoles={["client"]} />} />
             <Route path="/aisuggestions" element={<ProtectedRoute element={<AISuggestions />} allowedRoles={["client"]} />} />
             <Route path="/payment-history" element={<ProtectedRoute element={<PaymentHistory />} allowedRoles={["client"]} />} />
           </>
@@ -137,7 +138,6 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
             <Route path="/availability" element={<ProtectedRoute element={<Availability trainerId={trainerId} />} allowedRoles={["trainer"]} />} />
             <Route path="/view-availability" element={<ProtectedRoute element={<ViewAvailability />} allowedRoles={["trainer"]} />} />
             <Route path="/trainer-dashboard" element={<ProtectedRoute element={<TrainerDashboard />} allowedRoles={["trainer"]} />} />
-            <Route path="/workout-plan" element={<ProtectedRoute element={<WorkoutPlan />} allowedRoles={["trainer"]} />} />
             <Route path="/assign-workout" element={<ProtectedRoute element={<AssignWorkout />} allowedRoles={["trainer"]} />} />
           </>
         )}
