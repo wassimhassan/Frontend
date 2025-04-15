@@ -60,28 +60,46 @@ const SubscriptionManagement = () => {
   // ✅ Renew Subscription
   const renewSubscription = async (id) => {
     try {
-      // Default renewal period: 1 month from now
-      const endDate = new Date();
-      endDate.setMonth(endDate.getMonth() + 1);
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 1);
 
+        const response = await axios.put(
+            `${process.env.REACT_APP_BACKEND_URL}/api/subscriptions/renew/${id}`,
+            {
+                endDate: endDate.toISOString(),
+                amountPaid: 0, // This will be updated when payment is processed
+                method: "cash", // Default to cash payment
+                transactionId: "N/A" // For cash payments
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        
+        if (response.data.message) {
+            setError(null);
+            fetchSubscriptions(); // Refresh the list
+        }
+    } catch (error) {
+        console.error("Error renewing subscription:", error);
+        setError("Failed to renew subscription. Please try again.");
+    }
+};
+
+  // ✅ Approve Pending Subscription
+  const approveSubscription = async (id) => {
+    try {
       const response = await axios.put(
-        `${process.env.REACT_APP_BACKEND_URL}/api/subscriptions/renew/${id}`,
-        {
-          endDate: endDate.toISOString(),
-          amountPaid: 0, // This will be updated when payment is processed
-          method: "cash", // Default to cash payment
-          transactionId: "N/A" // For cash payments
-        },
+        `${process.env.REACT_APP_BACKEND_URL}/api/subscriptions/approve/${id}`,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
+
       if (response.data.message) {
         setError(null);
         fetchSubscriptions(); // Refresh the list
       }
     } catch (error) {
-      console.error("Error renewing subscription:", error);
-      setError("Failed to renew subscription. Please try again.");
+      console.error("Error approving subscription:", error);
+      setError("Failed to approve subscription. Please try again.");
     }
   };
 
@@ -116,13 +134,17 @@ const SubscriptionManagement = () => {
                 <td>{sub.clientId?.username || 'N/A'}</td>
                 <td>{sub.planType}</td>
                 <td>{new Date(sub.renewalDate).toLocaleDateString()}</td>
-                <td className={sub.status === "active" ? "status-active" : "status-expired"}>
+                <td className={sub.status === "active" ? "status-active" : sub.status === "pending" ? "status-pending" : "status-canceled"}>
                   {sub.status}
                 </td>
                 <td>
                   {sub.status === "active" ? (
                     <button onClick={() => cancelSubscription(sub._id)} className="cancel-btn">
                       Cancel
+                    </button>
+                  ) : sub.status === "pending" ? (
+                    <button onClick={() => approveSubscription(sub._id)} className="approve-btn">
+                      Approve
                     </button>
                   ) : (
                     <button onClick={() => renewSubscription(sub._id)} className="renew-btn">

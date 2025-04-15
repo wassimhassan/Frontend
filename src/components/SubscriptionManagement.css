@@ -1,6 +1,8 @@
 /* SubscriptionManagement.css */
 .subscription-container {
   padding: 20px;
+  width: 80%;
+  margin: 0 auto;
   font-family: Arial, sans-serif;
 }
 
@@ -8,6 +10,14 @@
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 15px;
+}
+
+.status-pending {
+  color: orange;
+}
+.approve-btn {
+  background-color: green;
+  color: white;
 }
 
 .search-container {
@@ -53,7 +63,9 @@
 }
 
 .subscription-table th {
-  background-color: #f4f4f4;
+  background-color: #ccf0f2;
+  color: #555;
+
 }
 
 .status-active {

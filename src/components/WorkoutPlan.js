@@ -2,231 +2,428 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./WorkoutPlan.css";
 
-const WorkoutPlan = () => {
-  const [role, setRole] = useState(localStorage.getItem("role"));
-  const [token] = useState(localStorage.getItem("token"));
-  const [userId] = useState(localStorage.getItem("userId"));
+function WorkoutPlan() {
+  const [workoutPlans, setWorkoutPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [completedExercises, setCompletedExercises] = useState({});
+  const [completedWorkouts, setCompletedWorkouts] = useState({});
+  const [userId, setUserId] = useState(null);
+  const [saveStatus, setSaveStatus] = useState(null);
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [tokenValid, setTokenValid] = useState(true);
 
-  const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [plans, setPlans] = useState([]);
-  const [formMode, setFormMode] = useState("create"); // or "edit"
-  const [editingPlanId, setEditingPlanId] = useState(null);
-
-  // Form state
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [exercises, setExercises] = useState([{ name: "", sets: "", reps: "", rest: "" }]);
-
-  // Fetch clients for trainer
   useEffect(() => {
-    if (role === "trainer") {
-      axios
-        .get("http://localhost:5000/api/trainers/trainer/clients", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => setClients(res.data || []))
-        .catch((err) => console.error("Error fetching clients", err));
-    }
-  }, [role, token]);
+    const fetchWorkoutPlans = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const storedUserId = localStorage.getItem("userId");
+        console.log("Fetching workout plans with token:", token ? "Token exists" : "No token");
+        setUserId(storedUserId);
 
-  // Fetch plans based on role
-  useEffect(() => {
-    if (!token || !userId) return;
-
-    axios
-      .get("http://localhost:5000/api/workouts", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        if (role === "trainer" && selectedClient) {
-          const filtered = res.data.filter((plan) =>
-            plan.assignedClients.includes(selectedClient._id)
-          );
-          setPlans(filtered);
-        } else if (role === "client") {
-          const filtered = res.data.filter((plan) =>
-            plan.assignedClients.includes(userId)
-          );
-          setPlans(filtered);
+        if (!token) {
+          setTokenValid(false);
+          setError("Authentication required. Please log in again.");
+          setLoading(false);
+          return;
         }
-      })
-      .catch((err) => console.error("Error fetching plans", err));
-  }, [role, selectedClient, token, userId]);
 
-  const handleAddExercise = () => {
-    setExercises([...exercises, { name: "", sets: "", reps: "", rest: "" }]);
-  };
+        // Get user info first to determine role
+        try {
+          const userResponse = await axios.get("http://localhost:5000/api/users/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUserRole(userResponse.data.role);
+          console.log("User role:", userResponse.data.role);
+        } catch (userErr) {
+          console.warn("Could not fetch user info:", userErr);
+          if (userErr.response?.status === 401) {
+            setTokenValid(false);
+            setError("Your session has expired. Please log in again.");
+            setLoading(false);
+            return;
+          }
+        }
 
-  const handleChangeExercise = (index, field, value) => {
-    const updated = [...exercises];
-    updated[index][field] = value;
-    setExercises(updated);
-  };
+        const response = await axios.get("http://localhost:5000/api/workouts", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-  const handleDeletePlan = async (id) => {
-    if (!window.confirm("Delete this plan?")) return;
+        console.log("Received workout plans:", response.data);
+        setWorkoutPlans(response.data);
 
-    try {
-      await axios.delete(`http://localhost:5000/api/workouts/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPlans(plans.filter((p) => p._id !== id));
-    } catch (err) {
-      console.error("Error deleting plan", err);
-    }
-  };
+        // Fetch existing progress data
+        if (storedUserId) {
+          try {
+            const progressResponse = await axios.get(`http://localhost:5000/api/progress/${storedUserId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
 
-  const handleEditPlan = (plan) => {
-    setFormMode("edit");
-    setEditingPlanId(plan._id);
-    setTitle(plan.title);
-    setDescription(plan.description);
-    setExercises(plan.exercises);
-  };
-
-  const handleSubmit = async () => {
-    if (!title.trim()) return alert("Title required");
-
-    const data = {
-      title,
-      description,
-      exercises: exercises.map((ex) => ({
-        name: ex.name,
-        sets: parseInt(ex.sets),
-        reps: parseInt(ex.reps),
-        rest: parseInt(ex.rest),
-      })),
-      assignedClients: selectedClient ? [selectedClient._id] : [],
+            if (progressResponse.data) {
+              console.log("Loaded progress data:", progressResponse.data);
+              setCompletedExercises(progressResponse.data.completedExercises || {});
+              setCompletedWorkouts(progressResponse.data.completedWorkouts || {});
+            }
+          } catch (progressErr) {
+            console.warn("Could not fetch progress data:", progressErr);
+            // Initialize progress tracking
+            initializeProgressTracking(response.data);
+          }
+        } else {
+          // Initialize progress tracking
+          initializeProgressTracking(response.data);
+        }
+      } catch (err) {
+        console.error("Error fetching workout plans:", err);
+        if (err.response?.status === 401) {
+          setTokenValid(false);
+          setError("Authentication failed. Please log in again.");
+        } else {
+          setError(
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            "Failed to load workout plans."
+          );
+        }
+      } finally {
+        setLoading(false);
+      }
     };
 
-    try {
-      if (formMode === "edit") {
-        await axios.put(`http://localhost:5000/api/workouts/${editingPlanId}`, data, {
-          headers: { Authorization: `Bearer ${token}` },
+    fetchWorkoutPlans();
+  }, []);
+
+  const initializeProgressTracking = (plans) => {
+    const initialExercises = {};
+    const initialWorkouts = {};
+    plans.forEach(plan => {
+      initialWorkouts[plan._id] = false;
+      plan.exercises.forEach((ex, index) => {
+        const key = `${plan._id}-${index}`;
+        initialExercises[key] = false;
+      });
+    });
+    setCompletedExercises(initialExercises);
+    setCompletedWorkouts(initialWorkouts);
+  };
+
+  const markExerciseComplete = (planId, exerciseIndex) => {
+    setCompletedExercises(prev => {
+      const key = `${planId}-${exerciseIndex}`;
+      const updatedExercises = {
+        ...prev,
+        [key]: !prev[key]
+      };
+
+      // Auto-check if all exercises are completed
+      const plan = workoutPlans.find(p => p._id === planId);
+      if (plan) {
+        const allCompleted = plan.exercises.every((_, index) => {
+          const exerciseKey = `${planId}-${index}`;
+          return updatedExercises[exerciseKey];
         });
-        alert("Workout updated");
-      } else {
-        await axios.post("http://localhost:5000/api/workouts", data, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        alert("Workout created");
+
+        // If auto-complete option is enabled, mark workout as complete
+        if (allCompleted && !completedWorkouts[planId]) {
+          setCompletedWorkouts(prevWorkouts => ({
+            ...prevWorkouts,
+            [planId]: true
+          }));
+          // Show temporary message that workout is completed
+          setSaveStatus({ type: "info", message: "All exercises completed! Workout marked as done." });
+          setTimeout(() => setSaveStatus(null), 3000);
+        }
       }
 
-      // Reset form
-      setFormMode("create");
-      setEditingPlanId(null);
-      setTitle("");
-      setDescription("");
-      setExercises([{ name: "", sets: "", reps: "", rest: "" }]);
+      return updatedExercises;
+    });
+  };
 
-      // Trigger refresh
-      setSelectedClient({ ...selectedClient });
+  const markWorkoutComplete = (planId) => {
+    setCompletedWorkouts(prev => {
+      const isCompleting = !prev[planId];
+      const updatedWorkouts = {
+        ...prev,
+        [planId]: isCompleting
+      };
+
+      // When marking a workout complete/incomplete, also mark all its exercises
+      const updatedExercises = { ...completedExercises };
+      const plan = workoutPlans.find(p => p._id === planId);
+      if (plan) {
+        plan.exercises.forEach((_, index) => {
+          const key = `${planId}-${index}`;
+          updatedExercises[key] = isCompleting;
+        });
+        setCompletedExercises(updatedExercises);
+      }
+
+      return updatedWorkouts;
+    });
+  };
+
+  const checkIfAllExercisesComplete = (planId) => {
+    const plan = workoutPlans.find(p => p._id === planId);
+    if (!plan) return false;
+
+    return plan.exercises.every((_, index) => {
+      const key = `${planId}-${index}`;
+      return completedExercises[key];
+    });
+  };
+
+  const saveProgress = async () => {
+    const token = localStorage.getItem("token");
+    if (!token || !userId) {
+      setSaveStatus({ type: "error", message: "Authentication required to save progress." });
+      return;
+    }
+
+    setSaveStatus({ type: "loading", message: "Saving your progress..." });
+
+    try {
+      const progressData = {
+        userId,
+        completedExercises,
+        completedWorkouts,
+        timestamp: new Date().toISOString()
+      };
+
+      // Save progress to the backend
+      const response = await axios.post(
+        "http://localhost:5000/api/progress/save",
+        progressData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      console.log("Progress saved:", response.data);
+      setSaveStatus({ type: "success", message: "Progress saved successfully!" });
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveStatus(null), 3000);
     } catch (err) {
-      console.error("Error submitting", err.response?.data || err.message);
+      console.error("Error saving progress:", err);
+      if (err.response?.status === 401) {
+        setSaveStatus({
+          type: "error",
+          message: "Your session has expired. Please log in again."
+        });
+        setTokenValid(false);
+      } else {
+        setSaveStatus({
+          type: "error",
+          message: err.response?.data?.error || "Failed to save progress. Please try again."
+        });
+      }
     }
   };
 
-  return (
-    <div className="workout-container">
-      <h2>Workout Plans</h2>
+  const handleLogIn = () => {
+    // Redirect to login page
+    window.location.href = "/login";
+  };
 
-      {role === "trainer" && (
-        <div>
-          <h3>Your Clients:</h3>
-          {clients.map((client) => (
-            <button key={client._id} onClick={() => setSelectedClient(client)}>
-              {client.name}
-            </button>
-          ))}
+  if (loading) return <div className="loading">Loading workout plans...</div>;
+
+  if (!tokenValid) {
+    return (
+      <div className="auth-error-container">
+        <p className="auth-error-message">{error || "Your session has expired."}</p>
+        <button className="login-btn" onClick={handleLogIn}>
+          Log In Again
+        </button>
+      </div>
+    );
+  }
+
+  if (error) return (
+    <div className="error-container">
+      <p className="error-message">{error}</p>
+      <button onClick={() => window.location.reload()}>Try Again</button>
+    </div>
+  );
+
+  // Separate active and completed workouts
+  const activeWorkouts = workoutPlans.filter(plan => !completedWorkouts[plan._id]);
+  const completedWorkoutPlans = workoutPlans.filter(plan => completedWorkouts[plan._id]);
+
+  // Determine which plans to show based on the toggle
+  const visibleActiveWorkouts = activeWorkouts;
+  const visibleCompletedWorkouts = showCompleted ? completedWorkoutPlans : [];
+
+  return (
+    <div className="client-workout-view">
+      <h2>{userRole === "trainer" ? "📋 Created Workout Plans" : "📋 My Assigned Workouts"}</h2>
+
+      {workoutPlans.length === 0 && (
+        <p className="no-plans">
+          {userRole === "trainer"
+            ? "You haven't created any workout plans yet."
+            : "No workout plans are assigned to you yet."}
+        </p>
+      )}
+
+      {/* Save status message */}
+      {saveStatus && (
+        <div className={`save-status ${saveStatus.type}`}>
+          {saveStatus.message}
         </div>
       )}
 
-      {role === "trainer" && selectedClient && (
+      {/* Active Workouts Section */}
+      {visibleActiveWorkouts.length > 0 && (
         <>
-          <h3>Plans for {selectedClient.name}</h3>
-          <button onClick={() => setFormMode("create")}>➕ Create Plan</button>
+          <h3 className="section-header">Active Workouts</h3>
+          <div className="workout-plans-grid">
+            {visibleActiveWorkouts.map((plan) => (
+              <div
+                key={plan._id}
+                className="workout-card"
+              >
+                <h3 className="plan-title">{plan.title}</h3>
+                <p className="plan-description">{plan.description}</p>
+
+                <h4 className="exercises-header">Exercises:</h4>
+                <ul className="exercises-list">
+                  {plan.exercises.map((ex, i) => (
+                    <li
+                      key={i}
+                      className={`exercise-item ${completedExercises[`${plan._id}-${i}`] ? 'exercise-completed' : ''}`}
+                    >
+                      <div className="exercise-name">{ex.name}</div>
+                      <div className="exercise-details">
+                        {ex.sets} sets × {ex.reps} reps
+                        {ex.rest && <span className="rest-period"> • Rest: {ex.rest}</span>}
+                      </div>
+                      {ex.notes && <div className="exercise-notes">{ex.notes}</div>}
+
+                      {userRole !== "trainer" && (
+                        <button
+                          className={`exercise-done-btn ${completedExercises[`${plan._id}-${i}`] ? 'done' : ''}`}
+                          onClick={() => markExerciseComplete(plan._id, i)}
+                        >
+                          {completedExercises[`${plan._id}-${i}`] ? '✓ Done' : 'Mark Done'}
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+
+                {userRole === "trainer" && plan.assignedClients && (
+                  <div className="assigned-clients">
+                    <p>Assigned to {plan.assignedClients.length} client(s)</p>
+                  </div>
+                )}
+
+                {userRole !== "trainer" && (
+                  <div className="workout-actions">
+                    <button
+                      className="workout-complete-btn"
+                      onClick={() => markWorkoutComplete(plan._id)}
+                    >
+                      {checkIfAllExercisesComplete(plan._id)
+                        ? 'All Exercises Done - Complete Workout'
+                        : 'Complete Workout'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </>
       )}
 
-      {plans.map((plan) => (
-        <div key={plan._id} className="plan-card">
-          <h4>{plan.title}</h4>
-          <p>{plan.description}</p>
-          <ul>
-            {plan.exercises.map((ex, idx) => (
-              <li key={idx}>
-                {ex.name} – {ex.sets}x{ex.reps} (Rest: {ex.rest}s)
-              </li>
-            ))}
-          </ul>
-          {role === "trainer" && (
-            <>
-              <button onClick={() => handleEditPlan(plan)}>✏️ Edit</button>
-              <button onClick={() => handleDeletePlan(plan._id)}>🗑️ Delete</button>
-            </>
-          )}
-        </div>
-      ))}
+      {/* No active workouts message */}
+      {visibleActiveWorkouts.length === 0 && workoutPlans.length > 0 && (
+        <p className="no-plans">No active workouts. All workouts are completed!</p>
+      )}
 
-      {/* Trainer Form */}
-      {role === "trainer" && selectedClient && (
-        <div className="plan-form">
-          <h3>{formMode === "edit" ? "Edit Plan" : "Create Plan"}</h3>
-
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Plan title"
-            className="input-field"
-          />
-
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Description"
-            className="input-field"
-            rows={3}
-          />
-
-          {exercises.map((ex, index) => (
-            <div key={index} className="exercise-card">
-              <input
-                type="text"
-                value={ex.name}
-                onChange={(e) => handleChangeExercise(index, "name", e.target.value)}
-                placeholder="Exercise"
-              />
-              <input
-                type="number"
-                value={ex.sets}
-                onChange={(e) => handleChangeExercise(index, "sets", e.target.value)}
-                placeholder="Sets"
-              />
-              <input
-                type="number"
-                value={ex.reps}
-                onChange={(e) => handleChangeExercise(index, "reps", e.target.value)}
-                placeholder="Reps"
-              />
-              <input
-                type="number"
-                value={ex.rest}
-                onChange={(e) => handleChangeExercise(index, "rest", e.target.value)}
-                placeholder="Rest"
-              />
-            </div>
-          ))}
-
-          <button onClick={handleAddExercise}>➕ Add Exercise</button>
-          <button onClick={handleSubmit}>
-            {formMode === "edit" ? "Update Plan" : "Save Plan"}
+      {/* Save Progress Button */}
+      {workoutPlans.length > 0 && userRole !== "trainer" && (
+        <div className="save-progress">
+          <button className="save-btn" onClick={saveProgress}>
+            Save Progress
           </button>
         </div>
       )}
+      
+      {/* Toggle for completed workouts */}
+      {userRole !== "trainer" && completedWorkoutPlans.length > 0 && (
+        <div className="workout-filters">
+          <label className="show-completed-toggle">
+            <input 
+              type="checkbox" 
+              checked={showCompleted} 
+              onChange={() => setShowCompleted(!showCompleted)}
+            />
+            Show completed workouts
+          </label>
+        </div>
+      )}
+
+      {/* Completed Workouts Section */}
+      {visibleCompletedWorkouts.length > 0 && (
+        <>
+          <h3 className="section-header completed-section">Completed Workouts</h3>
+          <div className="workout-plans-grid completed-grid">
+            {visibleCompletedWorkouts.map((plan) => (
+              <div
+                key={plan._id}
+                className="workout-card workout-completed"
+              >
+                <h3 className="plan-title">{plan.title}</h3>
+                <p className="plan-description">{plan.description}</p>
+
+                <h4 className="exercises-header">Exercises:</h4>
+                <ul className="exercises-list">
+                  {plan.exercises.map((ex, i) => (
+                    <li
+                      key={i}
+                      className="exercise-item exercise-completed"
+                    >
+                      <div className="exercise-name">{ex.name}</div>
+                      <div className="exercise-details">
+                        {ex.sets} sets × {ex.reps} reps
+                        {ex.rest && <span className="rest-period"> • Rest: {ex.rest}</span>}
+                      </div>
+                      {ex.notes && <div className="exercise-notes">{ex.notes}</div>}
+
+                      {userRole !== "trainer" && (
+                        <button
+                          className="exercise-done-btn done"
+                          onClick={() => markExerciseComplete(plan._id, i)}
+                        >
+                          ✓ Done
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+
+                {userRole === "trainer" && plan.assignedClients && (
+                  <div className="assigned-clients">
+                    <p>Assigned to {plan.assignedClients.length} client(s)</p>
+                  </div>
+                )}
+
+                {userRole !== "trainer" && (
+                  <div className="workout-actions">
+                    <button
+                      className="workout-complete-btn completed"
+                      onClick={() => markWorkoutComplete(plan._id)}
+                    >
+                      ✓ Workout Completed
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
-};
+}
 
 export default WorkoutPlan;

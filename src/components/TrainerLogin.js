@@ -27,6 +27,7 @@ const TrainerLogin = ({ setTrainerId }) => {
       // ✅ Store Trainer ID & Token in Local Storage
       localStorage.setItem("token", token);
       localStorage.setItem("trainerId", trainer.id); // ✅ Correct Key
+      localStorage.setItem("userId", trainer.id);
       localStorage.setItem("role", "trainer");
 
       console.log("✅ Trainer logged in successfully. Trainer ID:", trainer.id);
