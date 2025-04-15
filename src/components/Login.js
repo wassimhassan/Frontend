@@ -4,8 +4,8 @@ import "./Login.css";
 
 const Login = ({ setIsLoggingIn = () => {} }) => {
   useEffect(() => {
-    setIsLoggingIn(true); // Hide Navbar when user is on Login page
-    return () => setIsLoggingIn(false); // Show Navbar when user leaves
+    setIsLoggingIn(true);
+    return () => setIsLoggingIn(false);
   }, [setIsLoggingIn]);
 
   const [email, setEmail] = useState("");
@@ -22,7 +22,6 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
     setLoading(true);
 
     try {
-      // Clear any existing authentication data
       localStorage.clear();
 
       const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
@@ -36,7 +35,6 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
         localStorage.setItem("userId", user.id);
         localStorage.setItem("role", user.role);
 
-        // Redirect user based on role
         if (user.role === "client") {
           window.location.href = "/profile";
         } else if (user.role === "trainer") {
@@ -47,11 +45,10 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
       setError(error.response?.data?.message || "Login failed. Try again.");
       setForgotEmail(email);
     }
-    
+
     setLoading(false);
   };
 
-  // Handle forgot password
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setResetMessage("");
@@ -69,6 +66,14 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
       setError(error.response?.data?.message || "Failed to send reset link. Try again.");
     }
     setLoading(false);
+  };
+
+  const handleGoogleLogin = () => {
+    console.log('Initiating Google login...');
+    console.log('Backend URL:', process.env.REACT_APP_BACKEND_URL);
+    const googleAuthUrl = `${process.env.REACT_APP_BACKEND_URL}/api/auth/google`;
+    console.log('Redirecting to:', googleAuthUrl);
+    window.location.href = googleAuthUrl;
   };
 
   return (
@@ -100,7 +105,7 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
               href="#"
               onClick={(e) => {
                 e.preventDefault();
-                setForgotEmail(email); // ✅ Auto-fill email when opening the modal
+                setForgotEmail(email);
                 setShowForgotPassword(true);
               }}
             >
@@ -111,9 +116,17 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        <div className="divider">or</div>
+
+        <button
+          className="google-login-btn"
+          onClick={handleGoogleLogin}
+        >
+          Continue with Google
+        </button>
       </div>
 
-      {/* Forgot Password Modal */}
       {showForgotPassword && (
         <div className="modal-overlay">
           <div className="modal">

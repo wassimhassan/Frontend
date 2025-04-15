@@ -27,6 +27,7 @@ import AISuggestions from "./components/AISuggestions.js";
 import TrainerManagement from "./components/TrainerManagement.js";
 import ChangePassword from "./components/ChangePassword.js";
 import PaymentHistory from "./components/PaymentHistory.js";
+import GoogleSuccess from "./pages/GoogleSuccess.js";
 
 function App() {
   console.log("App is rendering...");
@@ -114,8 +115,9 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
         <Route path="/trainer-login" element={<TrainerLogin setTrainerId={setTrainerId} />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/gym-owner-login" element={<GymOwnerLogin />} />
+        <Route path="/google-success" element={<GoogleSuccess />} />
 
-        {/* 🔹 Client Routes */}
+        {/* �� Client Routes */}
         {userRole === "client" && (
           <>
             <Route path="/profile" element={<ProtectedRoute element={<ProfileCard />} allowedRoles={["client"]} />} />
