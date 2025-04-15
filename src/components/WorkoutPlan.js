@@ -425,6 +425,5 @@ function WorkoutPlan() {
     </div>
   );
 }
-}
 
 export default WorkoutPlan;
