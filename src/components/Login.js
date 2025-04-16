@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./Login.css";
 
 const Login = ({ setIsLoggingIn = () => {} }) => {
@@ -81,7 +83,15 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
       <div className="login-box">
         <h2>Login</h2>
         <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin}>
           <div className="input-box">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
             <input
               type="email"
               placeholder="Email"
@@ -98,7 +108,15 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
+          {error && <p className="error-message">{error}</p>}
           {error && <p className="error-message">{error}</p>}
           <div className="forgot-password">
             <a
@@ -112,6 +130,9 @@ const Login = ({ setIsLoggingIn = () => {} }) => {
               Forgot Password?
             </a>
           </div>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
           <button type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>

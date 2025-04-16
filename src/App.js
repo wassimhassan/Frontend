@@ -56,8 +56,35 @@ function App() {
     };
   }, []);
 
+  console.log("App is rendering...");
+
+  const [trainerId, setTrainerId] = useState(localStorage.getItem("trainerId") || null);
+  const [userRole, setUserRole] = useState(localStorage.getItem("role") || null);
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const updateUserRole = () => {
+      const storedRole = localStorage.getItem("role");
+      const storedToken = localStorage.getItem("token");
+
+      if (!storedToken) {
+        setUserRole(null);
+      } else {
+        setUserRole(storedRole);
+      }
+    };
+
+    updateUserRole();
+    window.addEventListener("storage", updateUserRole);
+
+    return () => {
+      window.removeEventListener("storage", updateUserRole);
+    };
+  }, []);
+
   return (
     <Router>
+      <MainContent trainerId={trainerId} setTrainerId={setTrainerId} userRole={userRole} />
       <MainContent trainerId={trainerId} setTrainerId={setTrainerId} userRole={userRole} />
     </Router>
   );
@@ -102,7 +129,49 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
 
   const hideNavbarPaths = ["/", "/WelcomePage", "/signup", "/login", "/reset-password", "/trainer-login", "/gym-owner-login"];
 
+// 🔹 Secure Route Protection
+const ProtectedRoute = ({ element, allowedRoles }) => {
+  const [userRole, setUserRole] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    
+    if (!token || !role) {
+      setUserRole(null);
+    } else {
+      setUserRole(role);
+    }
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) return null;
+
+  if (!localStorage.getItem("token") || !allowedRoles.includes(userRole)) {
+    // Clear invalid authentication data
+    localStorage.clear();
+    
+    // Redirect based on the attempted role
+    if (allowedRoles.includes("gymOwner")) return <Navigate to="/gym-owner-login" />;
+    if (allowedRoles.includes("trainer")) return <Navigate to="/trainer-login" />;
+    return <Navigate to="/login" />;
+  }
+
+  return element;
+};
+
+function MainContent({ trainerId, setTrainerId, userRole }) {
+  const location = useLocation();
+  const [isSigningUp, setIsSigningUp] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const hideNavbarPaths = ["/", "/WelcomePage", "/signup", "/login", "/reset-password", "/trainer-login", "/gym-owner-login"];
+
   return (
+    <>
+      {!hideNavbarPaths.includes(location.pathname) && isSigningUp && !isLoggingIn && <Navbar userRole={userRole} />}
+
     <>
       {!hideNavbarPaths.includes(location.pathname) && isSigningUp && !isLoggingIn && <Navbar userRole={userRole} />}
 
@@ -158,6 +227,7 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
         {/* 🔹 Redirect unknown routes */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+    </>
     </>
   );
 }
