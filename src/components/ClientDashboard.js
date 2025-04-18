@@ -11,7 +11,7 @@ const ClientDashboard = () => {
 
   // Create axios instance with default headers
   const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: '`${process.env.REACT_APP_BACKEND_URL}/api',
     headers: {
       'Content-Type': 'application/json'
     }
@@ -101,7 +101,7 @@ const ClientDashboard = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.patch(
-        `http://localhost:5000/api/workouts/${workoutId}/exercises/${exerciseIndex}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/workouts/${workoutId}/exercises/${exerciseIndex}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

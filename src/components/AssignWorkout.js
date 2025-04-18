@@ -16,7 +16,7 @@ function AssignWorkout() {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/trainers/trainer/clients", {
+        const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/trainers/trainer/clients`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -36,7 +36,7 @@ function AssignWorkout() {
   useEffect(() => {
     const fetchAssignedWorkouts = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/workouts", {
+        const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/workouts`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setAssignedWorkouts(res.data);
@@ -75,7 +75,7 @@ function AssignWorkout() {
     };
 
     try {
-      await axios.post("http://localhost:5000/api/workouts", data, {
+      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/workouts`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -90,7 +90,7 @@ function AssignWorkout() {
       setExercises([{ name: "", sets: "", reps: "", rest: "" }]);
 
       // Re-fetch workouts
-      const res = await axios.get("http://localhost:5000/api/workouts", {
+      const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/workouts`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAssignedWorkouts(res.data);

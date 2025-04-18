@@ -4,7 +4,8 @@ import io from 'socket.io-client';
 import './Chat.css';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = `${process.env.REACT_APP_BACKEND_URL}`;
+
 
 // Helper function to validate MongoDB ObjectId
 const isValidObjectId = (id) => {

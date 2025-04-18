@@ -307,7 +307,7 @@ const TrainerAvailability = () => {
 
       // Fetch trainer profile to get default session price first
       const profileResponse = await axios.get(
-        "http://localhost:5000/api/trainers/trainer/profile",
+        `${process.env.REACT_APP_BACKEND_URL}/trainers/trainer/profile`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -322,7 +322,7 @@ const TrainerAvailability = () => {
 
       // Then fetch availability
       const response = await axios.get(
-        `http://localhost:5000/api/trainers/availability/${trainerId}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/trainers/availability/${trainerId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -594,7 +594,7 @@ const TrainerAvailability = () => {
       // Save default price if changed
       if (defaultPrice !== selectedPrice) {
         await axios.put(
-          "http://localhost:5000/api/trainers/trainer/profile",
+          `${process.env.REACT_APP_BACKEND_URL}/api/trainers/trainer/profile`,
           {
             sessionPrice: parseFloat(selectedPrice)
           },
@@ -609,7 +609,7 @@ const TrainerAvailability = () => {
 
       // Update availability
       const response = await axios.put(
-        "http://localhost:5000/api/trainers/availability",
+        `${process.env.REACT_APP_BACKEND_URL}/api/trainers/availability`,
         {
           availability: formattedAvailability
         },
@@ -726,7 +726,7 @@ const TrainerAvailability = () => {
       console.log("Formatted availability for update:", formattedAvailability);
 
       const response = await axios.put(
-        "http://localhost:5000/api/trainers/availability",
+        `${process.env.REACT_APP_BACKEND_URL}/api/trainers/availability`,
         {
           availability: formattedAvailability
         },
@@ -798,7 +798,7 @@ const TrainerAvailability = () => {
       const formattedAvailability = convertToBackendFormat(updatedSlots);
 
       const response = await axios.put(
-        "http://localhost:5000/api/trainers/availability",
+        `${process.env.REACT_APP_BACKEND_URL}/api/trainers/availability`,
         {
           availability: formattedAvailability
         },

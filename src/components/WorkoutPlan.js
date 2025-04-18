@@ -31,7 +31,7 @@ function WorkoutPlan() {
 
         // Get user info first to determine role
         try {
-          const userResponse = await axios.get("http://localhost:5000/api/users/me", {
+          const userResponse = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/users/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUserRole(userResponse.data.role);
@@ -46,7 +46,7 @@ function WorkoutPlan() {
           }
         }
 
-        const response = await axios.get("http://localhost:5000/api/workouts", {
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/workouts`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -56,7 +56,7 @@ function WorkoutPlan() {
         // Fetch existing progress data
         if (storedUserId) {
           try {
-            const progressResponse = await axios.get(`http://localhost:5000/api/progress/${storedUserId}`, {
+            const progressResponse = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/progress/${storedUserId}`, {
               headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -192,7 +192,7 @@ function WorkoutPlan() {
 
       // Save progress to the backend
       const response = await axios.post(
-        "http://localhost:5000/api/progress/save",
+        `${process.env.REACT_APP_BACKEND_URL}/api/progress/save`,
         progressData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
