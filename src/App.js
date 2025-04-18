@@ -100,7 +100,7 @@ function MainContent({ trainerId, setTrainerId, userRole }) {
   const [isSigningUp, setIsSigningUp] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const hideNavbarPaths = ["/", "/WelcomePage", "/signup", "/login", "/reset-password", "/trainer-login", "/gym-owner-login"];
+  const hideNavbarPaths = ["/", "/WelcomePage", "/SignUp", "/login", "/reset-password", "/trainer-login", "/gym-owner-login"];
 
   return (
     <>
