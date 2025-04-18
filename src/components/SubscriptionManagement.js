@@ -82,7 +82,7 @@ const SubscriptionManagement = () => {
         console.error("Error renewing subscription:", error);
         setError("Failed to renew subscription. Please try again.");
     }
-};
+  };
 
   // ✅ Approve Pending Subscription
   const approveSubscription = async (id) => {
@@ -104,50 +104,65 @@ const SubscriptionManagement = () => {
   };
 
   if (loading) {
-    return <div className="loading">Loading subscriptions...</div>;
+    return <div className="subMgmt-loading">Loading subscriptions...</div>;
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return <div className="subMgmt-error">{error}</div>;
   }
 
   return (
-    <div className="subscription-container">
-      <h1 className="subscription-title">Manage Client Subscriptions</h1>
+    <div className="subMgmt-container">
+      <h1 className="subMgmt-title">Manage Client Subscriptions</h1>
 
       {subscriptions.length === 0 ? (
-        <div className="empty-state">No subscriptions found.</div>
+        <div className="subMgmt-empty-state">No subscriptions found.</div>
       ) : (
-        <table className="subscription-table">
+        <table className="subMgmt-table">
           <thead>
             <tr>
-              <th>Client</th>
-              <th>Plan</th>
-              <th>Renewal Date</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th className="subMgmt-th">Client</th>
+              <th className="subMgmt-th">Plan</th>
+              <th className="subMgmt-th">Renewal Date</th>
+              <th className="subMgmt-th">Status</th>
+              <th className="subMgmt-th">Actions</th>
             </tr>
           </thead>
           <tbody>
             {subscriptions.map((sub) => (
-              <tr key={`sub-${sub._id}`}>
-                <td>{sub.clientId?.username || 'N/A'}</td>
-                <td>{sub.planType}</td>
-                <td>{new Date(sub.renewalDate).toLocaleDateString()}</td>
-                <td className={sub.status === "active" ? "status-active" : sub.status === "pending" ? "status-pending" : "status-canceled"}>
+              <tr key={`sub-${sub._id}`} className="subMgmt-row">
+                <td className="subMgmt-td">{sub.clientId?.username || 'N/A'}</td>
+                <td className="subMgmt-td">{sub.planType}</td>
+                <td className="subMgmt-td">{new Date(sub.renewalDate).toLocaleDateString()}</td>
+                <td className={`subMgmt-td ${
+                  sub.status === "active" 
+                    ? "subMgmt-status-active" 
+                    : sub.status === "pending" 
+                      ? "subMgmt-status-pending" 
+                      : "subMgmt-status-canceled"
+                }`}>
                   {sub.status}
                 </td>
-                <td>
+                <td className="subMgmt-td subMgmt-actions">
                   {sub.status === "active" ? (
-                    <button onClick={() => cancelSubscription(sub._id)} className="cancel-btn">
+                    <button 
+                      onClick={() => cancelSubscription(sub._id)} 
+                      className="subMgmt-cancel-btn"
+                    >
                       Cancel
                     </button>
                   ) : sub.status === "pending" ? (
-                    <button onClick={() => approveSubscription(sub._id)} className="approve-btn">
+                    <button 
+                      onClick={() => approveSubscription(sub._id)} 
+                      className="subMgmt-approve-btn"
+                    >
                       Approve
                     </button>
                   ) : (
-                    <button onClick={() => renewSubscription(sub._id)} className="renew-btn">
+                    <button 
+                      onClick={() => renewSubscription(sub._id)} 
+                      className="subMgmt-renew-btn"
+                    >
                       Renew
                     </button>
                   )}

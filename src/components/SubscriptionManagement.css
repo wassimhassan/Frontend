@@ -1,118 +1,168 @@
-/* SubscriptionManagement.css */
-.subscription-container {
-  padding: 20px;
-  width: 80%;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
+/* SubscriptionManagement.css with unique class names */
+
+.subMgmt-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-.subscription-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 15px;
+.subMgmt-title {
+  color: #ffffff;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 600;
 }
 
-.status-pending {
-  color: orange;
-}
-.approve-btn {
-  background-color: green;
-  color: white;
-}
-
-.search-container {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+.subMgmt-loading {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.search-input {
-  padding: 8px;
-  width: 200px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.subMgmt-error {
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 1rem;
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  margin-bottom: 2rem;
 }
 
-.clear-btn, .reset-btn {
-  padding: 8px 12px;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
+.subMgmt-empty-state {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.1rem;
+  color: #666;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.clear-btn {
-  background-color: #ff6666;
-  color: white;
-}
-
-.reset-btn {
-  background-color: #007bff;
-  color: white;
-}
-
-.subscription-table {
+.subMgmt-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
 }
 
-.subscription-table th, .subscription-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
+.subMgmt-th {
+  background-color: #f8f9fa;
+  padding: 1rem;
   text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
 }
 
-.subscription-table th {
-  background-color: #ccf0f2;
-  color: #555;
-
+.subMgmt-row {
+  transition: background-color 0.2s;
 }
 
-.status-active {
-  color: green;
-  font-weight: bold;
+.subMgmt-row:hover {
+  background-color: #f8f9fa;
 }
 
-.status-expired {
-  color: red;
-  font-weight: bold;
+.subMgmt-td {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
 }
 
-.loading {
-  padding: 20px;
-  text-align: center;
-  font-size: 18px;
-  color: #555;
+.subMgmt-status-active {
+  color: #28a745;
+  font-weight: 500;
 }
 
-.error {
-  padding: 20px;
-  text-align: center;
-  color: red;
-  font-size: 18px;
+.subMgmt-status-pending {
+  color: #ffc107;
+  font-weight: 500;
 }
 
-.empty-state {
-  padding: 20px;
-  text-align: center;
-  color: #555;
-  font-style: italic;
+.subMgmt-status-canceled {
+  color: #6c757d;
+  font-weight: 500;
 }
 
-.cancel-btn, .renew-btn {
-  padding: 6px 12px;
+.subMgmt-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.subMgmt-cancel-btn,
+.subMgmt-approve-btn,
+.subMgmt-renew-btn {
+  padding: 0.5rem 1rem;
   border: none;
   border-radius: 4px;
+  font-weight: 500;
   cursor: pointer;
-  font-weight: bold;
+  transition: background-color 0.2s;
 }
 
-.cancel-btn {
-  background-color: #ff6666;
+.subMgmt-cancel-btn {
+  background-color: #dc3545;
   color: white;
 }
 
-.renew-btn {
-  background-color: #4CAF50;
+.subMgmt-cancel-btn:hover {
+  background-color: #c82333;
+}
+
+.subMgmt-approve-btn {
+  background-color: #28a745;
   color: white;
+}
+
+.subMgmt-approve-btn:hover {
+  background-color: #218838;
+}
+
+.subMgmt-renew-btn {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.subMgmt-renew-btn:hover {
+  background-color: #138496;
+}
+
+/* Enhanced status indicators */
+.subMgmt-row:has(.subMgmt-status-active) {
+  border-left: 3px solid #28a745;
+}
+
+.subMgmt-row:has(.subMgmt-status-pending) {
+  border-left: 3px solid #ffc107;
+}
+
+.subMgmt-row:has(.subMgmt-status-canceled) {
+  border-left: 3px solid #6c757d;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .subMgmt-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .subMgmt-actions {
+    flex-direction: column;
+  }
+  
+  .subMgmt-cancel-btn,
+  .subMgmt-approve-btn,
+  .subMgmt-renew-btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
 }

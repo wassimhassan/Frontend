@@ -6,10 +6,10 @@ import { Elements, CardElement, useStripe, useElements } from "@stripe/react-str
 import "./SubscriptionForm.css";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY || "");
+
 const StripeSubscriptionForm = ({
     planType,
     planPrice,
-    endDate,
     onSubmitSuccess,
     onError
 }) => {
@@ -17,6 +17,13 @@ const StripeSubscriptionForm = ({
     const elements = useElements();
     const token = localStorage.getItem("token");
     const [loading, setLoading] = useState(false);
+
+    // Calculate end date (1 month from now)
+    const endDate = useMemo(() => {
+        const date = new Date();
+        date.setMonth(date.getMonth() + 1);
+        return date.toISOString();
+    }, []);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -85,7 +92,6 @@ const StripeSubscriptionForm = ({
 
 const SubscriptionForm = () => {
     const [planType, setPlanType] = useState("basic");
-    const [endDate, setEndDate] = useState("");
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
@@ -97,20 +103,23 @@ const SubscriptionForm = () => {
 
     const token = localStorage.getItem("token");
 
+    // Calculate end date (1 month from now) for display purposes
+    const displayEndDate = useMemo(() => {
+        const date = new Date();
+        date.setMonth(date.getMonth() + 1);
+        return date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }, []);
+
     // Dynamic price calculation
     const planPrice = useMemo(() => {
         const plan = plans.find(p => p.name === planType);
         return plan ? plan.basePrice : 0;
     }, [planType, plans]);
-
-    // Validation for end date
-    const isValidEndDate = (date) => {
-        const selectedDate = new Date(date);
-        const today = new Date();
-        const maxDate = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
-
-        return selectedDate > today && selectedDate <= maxDate;
-    };
 
     useEffect(() => {
         if (!token) {
@@ -155,48 +164,16 @@ const SubscriptionForm = () => {
         }
     }, [token, navigate]);
 
-    const handleSubmit = async () => {
-        setLoading(true);
-        setErrorMessage("");
-        setSuccessMessage("");
-
-        // Validation
-        if (!isValidEndDate(endDate)) {
-            setErrorMessage("Please select a valid future date within the next 12 months.");
-            setLoading(false);
-            return;
-        }
-
-        const subscriptionData = {
-            planType,
-            endDate,
-            method: "stripe", // Always Stripe
-            price: planPrice
-        };
-
-        try {
-            const response = await axios.post(
-                `${process.env.REACT_APP_BACKEND_URL}/api/payment/accept-stripe-payment`,
-                subscriptionData,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
-            setSuccessMessage("Subscription processed successfully!");
-            setTimeout(() => {
-                navigate("/subscriptions");
-            }, 2000);
-
-            setLoading(false);
-        } catch (error) {
-            console.error("Error processing subscription:", error.response?.data);
-            setErrorMessage(error.response?.data?.message || "Subscription failed. Try again.");
-            setLoading(false);
-        }
-    };
-
     return (
         <div className="subscription-form-container">
             <h2>Subscribe to a Plan</h2>
+            
+            {isSubscriptionButtonDisabled && (
+                <div className="active-subscription-notice">
+                    <p>You already have an active subscription. To change plans, please wait for your current subscription to end.</p>
+                </div>
+            )}
+
             <div className="form-group">
                 <label>Select a Plan:</label>
                 <select
@@ -213,37 +190,34 @@ const SubscriptionForm = () => {
                 </select>
             </div>
 
-            <div className="form-group">
-                <label>Subscription End Date:</label>
-                <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    max={new Date(new Date().getFullYear() + 1, new Date().getMonth(), new Date().getDate()).toISOString().split('T')[0]}
-                    required
-                />
+            <div className="subscription-details">
+                <div className="subscription-info">
+                    <p><strong>Subscription Period:</strong> One month</p>
+                    <p><strong>Start Date:</strong> Today</p>
+                    <p><strong>End Date:</strong> {displayEndDate}</p>
+                </div>
+
+                <div className="price-summary">
+                    <p><strong>Selected Plan:</strong> {planType.charAt(0).toUpperCase() + planType.slice(1)}</p>
+                    <p><strong>Monthly Price:</strong> ${planPrice}</p>
+                </div>
             </div>
 
-            <div className="price-summary">
-                <p>Selected Plan: {planType.charAt(0).toUpperCase() + planType.slice(1)}</p>
-                <p>Monthly Price: ${planPrice}</p>
-            </div>
-
-            <Elements stripe={stripePromise}>
-                <StripeSubscriptionForm
-                    planType={planType}
-                    planPrice={planPrice}
-                    endDate={endDate}
-                    onSubmitSuccess={(message) => {
-                        setSuccessMessage(message);
-                        setTimeout(() => {
-                            navigate("/subscriptions");
-                        }, 2000);
-                    }}
-                    onError={(error) => setErrorMessage(error)}
-                />
-            </Elements>
+            {!isSubscriptionButtonDisabled && (
+                <Elements stripe={stripePromise}>
+                    <StripeSubscriptionForm
+                        planType={planType}
+                        planPrice={planPrice}
+                        onSubmitSuccess={(message) => {
+                            setSuccessMessage(message);
+                            setTimeout(() => {
+                                navigate("/subscriptions");
+                            }, 2000);
+                        }}
+                        onError={(error) => setErrorMessage(error)}
+                    />
+                </Elements>
+            )}
 
             {errorMessage && <p className="error">{errorMessage}</p>}
             {successMessage && <p className="success">{successMessage}</p>}

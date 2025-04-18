@@ -17,8 +17,7 @@
   padding: 1.5rem;
   margin-bottom: 2rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
 }
 
 .pending-payment-alert h3 {
@@ -40,10 +39,167 @@
   cursor: pointer;
   font-weight: 500;
   transition: background-color 0.2s;
+  align-self: flex-start;
+  margin-top: 0.5rem;
 }
 
 .pay-now-button:hover {
   background-color: #0056b3;
+}
+
+.payment-form-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.payment-form-container h4 {
+  margin-top: 0;
+  color: #333;
+}
+
+.payment-form {
+  margin-bottom: 1rem;
+}
+
+.card-element-container {
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  margin-bottom: 1rem;
+}
+
+.pay-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.pay-button:hover {
+  background-color: #218838;
+}
+
+.pay-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.cancel-payment-button {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.cancel-payment-button:hover {
+  background-color: #5a6268;
+}
+
+.payment-error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.payment-success-alert {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.success-icon {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  background-color: #28a745;
+  color: white;
+  border-radius: 50%;
+  font-size: 28px;
+  line-height: 50px;
+  margin-bottom: 1rem;
+}
+
+.pending-bookings-section {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pending-bookings-section h3 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.pending-bookings-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pending-bookings-table th,
+.pending-bookings-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.pending-bookings-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.payment-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-group label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.filter-group select {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  background-color: white;
+  font-size: 1rem;
 }
 
 .payment-history-summary {
@@ -104,8 +260,24 @@
   color: #495057;
 }
 
-.payment-table tr:hover {
+.payment-row {
+  transition: background-color 0.2s;
+}
+
+.payment-row:hover {
   background-color: #f8f9fa;
+}
+
+.payment-row.status-completed {
+  border-left: 4px solid #28a745;
+}
+
+.payment-row.status-pending {
+  border-left: 4px solid #ffc107;
+}
+
+.payment-row.status-failed {
+  border-left: 4px solid #dc3545;
 }
 
 .status-badge {
@@ -140,6 +312,12 @@
   text-decoration: underline;
 }
 
+.no-receipt {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
 .payment-history-loading,
 .payment-history-error {
   text-align: center;
@@ -147,9 +325,36 @@
   color: #666;
 }
 
+.payment-history-error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  color: #721c24;
+}
+
 .no-payments {
   text-align: center;
   padding: 2rem;
   color: #666;
   font-style: italic;
-} 
+}
+
+@media (max-width: 768px) {
+  .pending-payment-alert {
+    flex-direction: column;
+  }
+  
+  .pay-now-button {
+    margin-top: 1rem;
+    width: 100%;
+  }
+  
+  .payment-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .filter-group {
+    min-width: 100%;
+  }
+}

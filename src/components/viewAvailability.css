@@ -1,33 +1,29 @@
+/* ViewAvailability.css - Updated to match trainer availability theme */
 .va-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 30px 20px;
   font-family: 'Inter', 'Segoe UI', sans-serif;
   color: #334155;
-  background-color: #f8fafc;
+  background-color: #f8fafc !important;
   min-height: 100vh;
 }
 
 .va-title {
-  color: #0f172a;
+  color: #2c3e50;
   text-align: center;
   margin-bottom: 40px;
   font-size: 2.2rem;
   font-weight: 700;
   position: relative;
   padding-bottom: 12px;
-}
-
-.va-title::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 4px;
-  background: linear-gradient(90deg, #3b82f6, #6366f1);
-  border-radius: 2px;
+  background: linear-gradient(135deg, #3498db, #2c3e50);
+  padding: 14px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Tab Navigation */
@@ -56,16 +52,16 @@
 }
 
 .va-tab:hover {
-  color: #3b82f6;
+  color: #3498db;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
 }
 
 .va-tab.active {
   color: white;
   font-weight: 600;
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
-  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.25);
+  background: linear-gradient(135deg, #3498db, #2c3e50);
+  box-shadow: 0 8px 16px rgba(52, 152, 219, 0.25);
 }
 
 .va-tab.active::before {
@@ -104,7 +100,7 @@
   width: 30px;
   height: 30px;
   border: 3px solid #e2e8f0;
-  border-top: 3px solid #3b82f6;
+  border-top: 3px solid #3498db;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -116,20 +112,20 @@
 
 .va-error {
   color: #dc2626;
-  background-color: #fef2f2;
-  border-left: 5px solid #dc2626;
+  background-color: #fff5f5;
+  border-left: 5px solid #e74c3c;
 }
 
 .va-content {
-  background-color: white;
+  background-color: white !important;
   border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
   padding: 30px;
   transition: all 0.3s ease;
 }
 
 .va-content h3 {
-  color: #0f172a;
+  color: #2c3e50 !important;
   font-size: 1.4rem;
   margin-top: 0;
   margin-bottom: 25px;
@@ -145,7 +141,7 @@
   top: 10%;
   height: 80%;
   width: 5px;
-  background: linear-gradient(to bottom, #3b82f6, #6366f1);
+  background: linear-gradient(to bottom, #3498db, #2c3e50);
   border-radius: 3px;
 }
 
@@ -182,7 +178,7 @@
   top: 0;
   width: 5px;
   height: 100%;
-  background: linear-gradient(to bottom, #3b82f6, #6366f1);
+  background: linear-gradient(to bottom, #3498db, #2c3e50);
 }
 
 .va-time {
@@ -199,7 +195,7 @@
 }
 
 .va-time:hover {
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
   border-color: #bfdbfe;
 }
 
@@ -228,11 +224,11 @@
   top: 0;
   width: 5px;
   height: 100%;
-  background: linear-gradient(to bottom, #3b82f6, #6366f1);
+  background: linear-gradient(to bottom, #3498db, #2c3e50);
 }
 
 .va-booking-card.completed::before {
-  background: linear-gradient(to bottom, #10b981, #059669);
+  background: linear-gradient(to bottom, #2ecc71, #27ae60);
 }
 
 .va-booking-card:hover {
@@ -253,7 +249,7 @@
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #0f172a;
+  color: #2c3e50;
 }
 
 .va-status {
@@ -266,13 +262,13 @@
 }
 
 .va-status.upcoming, .va-status.undone {
-  background-color: #eff6ff;
-  color: #1e40af;
+  background-color: #eaf2f8;
+  color: #2980b9;
 }
 
 .va-status.completed {
-  background-color: #ecfdf5;
-  color: #065f46;
+  background-color: #e8f8f5;
+  color: #16a085;
 }
 
 .va-booking-details {
@@ -318,23 +314,23 @@
 }
 
 .complete-btn {
-  background-color: #10b981;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
   color: white;
 }
 
 .complete-btn:hover {
-  background-color: #059669;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
 
 .undone-btn {
-  background-color: #f43f5e;
+  background-color: #e74c3c;
   color: white;
 }
 
 .undone-btn:hover {
-  background-color: #e11d48;
-  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+  background-color: #c0392b;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
 /* Clients section */
@@ -362,7 +358,7 @@
   top: 0;
   width: 5px;
   height: 100%;
-  background: linear-gradient(to bottom, #6366f1, #8b5cf6);
+  background: linear-gradient(to bottom, #3498db, #2c3e50);
 }
 
 .va-client-card:hover {
@@ -373,7 +369,7 @@
 
 .va-client-card h4 {
   margin-top: 0;
-  color: #0f172a;
+  color: #2c3e50;
   border-bottom: 1px solid #f1f5f9;
   padding-bottom: 15px;
   font-size: 20px;
@@ -418,7 +414,7 @@
   top: 20%;
   height: 60%;
   width: 4px;
-  background: linear-gradient(to bottom, #6366f1, #8b5cf6);
+  background: linear-gradient(to bottom, #3498db, #2c3e50);
   border-radius: 2px;
 }
 
@@ -448,7 +444,7 @@
 }
 
 .va-client-sessions li.completed {
-  background-color: #ecfdf5;
+  background-color: #e8f8f5;
   border-color: #a7f3d0;
 }
 
@@ -459,7 +455,7 @@
 .va-completed-badge {
   position: absolute;
   right: 15px;
-  color: #10b981;
+  color: #2ecc71;
   font-weight: bold;
 }
 
@@ -473,12 +469,12 @@
 }
 
 .va-client-sessions li.completed .va-status-badge {
-  color: #065f46;
+  color: #16a085;
   background-color: #a7f3d0;
 }
 
 .va-client-sessions li.undone .va-status-badge {
-  color: #be123c;
+  color: #c0392b;
   background-color: #fecdd3;
 }
 

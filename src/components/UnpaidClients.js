@@ -86,31 +86,31 @@ const UnpaidClients = () => {
   };
 
   return (
-    <div className="unpaid-clients-container">
-      <h1>Unpaid Clients</h1>
+    <div className="unpaid-container">
+      <h1 className="unpaid-title">Unpaid Clients</h1>
 
-      {loading && <p>Loading...</p>}
-      {error && <p className="error">{error}</p>}
+      {loading && <p className="unpaid-loading">Loading...</p>}
+      {error && <p className="unpaid-error">{error}</p>}
 
       {clients.length > 0 ? (
-        <table className="unpaid-clients-table">
+        <table className="unpaid-table">
           <thead>
-            <tr>
-              <th>Client Name</th>
-              <th>Email</th>
-              <th>Balance Due ($)</th>
-              <th>Actions</th>
+            <tr className="unpaid-header-row">
+              <th className="unpaid-header-cell">Client Name</th>
+              <th className="unpaid-header-cell">Email</th>
+              <th className="unpaid-header-cell">Balance Due ($)</th>
+              <th className="unpaid-header-cell">Actions</th>
             </tr>
           </thead>
           <tbody>
             {clients.map((client) => (
-              <tr key={client._id}>
-                <td>{client.username}</td>
-                <td>{client.email}</td>
-                <td>${client.balanceDue.toFixed(2)}</td>
-                <td>
+              <tr key={client._id} className="unpaid-row">
+                <td className="unpaid-cell">{client.username}</td>
+                <td className="unpaid-cell">{client.email}</td>
+                <td className="unpaid-cell unpaid-balance">${client.balanceDue.toFixed(2)}</td>
+                <td className="unpaid-cell">
                   <button 
-                    className="payment-button"
+                    className="unpaid-payment-btn"
                     onClick={() => handleOpenPaymentModal(client)}
                   >
                     Record Payment
@@ -121,23 +121,24 @@ const UnpaidClients = () => {
           </tbody>
         </table>
       ) : (
-        <p>No unpaid clients found.</p>
+        <p className="unpaid-empty">No unpaid clients found.</p>
       )}
 
       {/* Payment Modal */}
       {showPaymentModal && (
-        <div className="payment-modal-overlay">
-          <div className="payment-modal">
-            <h2>Record Cash Payment</h2>
-            <div className="payment-modal-content">
-              <p>Client: {selectedClient.username}</p>
-              <p>Current Balance Due: ${selectedClient.balanceDue.toFixed(2)}</p>
+        <div className="unpaid-modal-overlay">
+          <div className="unpaid-modal">
+            <h2 className="unpaid-modal-title">Record Cash Payment</h2>
+            <div className="unpaid-modal-content">
+              <p className="unpaid-modal-info">Client: {selectedClient.username}</p>
+              <p className="unpaid-modal-info">Current Balance Due: ${selectedClient.balanceDue.toFixed(2)}</p>
               
-              <div className="payment-input-group">
-                <label htmlFor="paymentAmount">Payment Amount:</label>
+              <div className="unpaid-input-group">
+                <label htmlFor="paymentAmount" className="unpaid-input-label">Payment Amount:</label>
                 <input
                   type="number"
                   id="paymentAmount"
+                  className="unpaid-input"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
                   max={selectedClient.balanceDue}
@@ -148,23 +149,23 @@ const UnpaidClients = () => {
               </div>
 
               {paymentAmount && (
-                <div className="payment-preview">
-                  <p>
+                <div className="unpaid-preview">
+                  <p className="unpaid-remaining-balance">
                     Remaining Balance: $
-                    {(selectedClient.balanceDue - parseFloat(paymentAmount)).toFixed(2)}
+                    {(selectedClient.balanceDue - parseFloat(paymentAmount || 0)).toFixed(2)}
                   </p>
                 </div>
               )}
 
-              <div className="payment-modal-actions">
+              <div className="unpaid-modal-actions">
                 <button 
-                  className="cancel-button"
+                  className="unpaid-cancel-btn"
                   onClick={() => setShowPaymentModal(false)}
                 >
                   Cancel
                 </button>
                 <button 
-                  className="confirm-payment-button"
+                  className="unpaid-confirm-btn"
                   onClick={handleCashPayment}
                   disabled={!paymentAmount || parseFloat(paymentAmount) <= 0}
                 >

@@ -44,7 +44,7 @@ const PaymentForm = ({ amount, bookingId, onSuccess, onError }) => {
                 amount,
                 paymentMethodId: paymentMethod.id,
                 // Include booking ID if we're paying for a specific booking
-                ...(bookingId && { bookingId: bookingId }) // Fixed: removed props reference
+                ...(bookingId && { bookingId: bookingId })
             };
             // Process payment with backend
             const response = await axios.post(
@@ -123,7 +123,9 @@ const BookingsPage = () => {
     const [paymentProcessing, setPaymentProcessing] = useState(false);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [showStripeForm, setShowStripeForm] = useState(false);
-    const [currentBookingId, setCurrentBookingId] = useState(null); // Added missing state variable
+    const [currentBookingId, setCurrentBookingId] = useState(null);
+    const [pendingPayments, setPendingPayments] = useState([]);
+    const [outstandingPayment, setOutstandingPayment] = useState(0);
     const token = localStorage.getItem("token");
     const clientId = localStorage.getItem("userId");
     const [showSubscriptionChoice, setShowSubscriptionChoice] = useState(false);
@@ -133,6 +135,7 @@ const BookingsPage = () => {
         fetchTrainersWithAvailability();
         fetchClientBookings();
         checkSubscriptionStatus();
+        fetchOutstandingPayments();
     }, []);
 
     // Check if user has an active subscription
@@ -143,12 +146,14 @@ const BookingsPage = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
+            console.log("Subscription status response:", response.data);
+
             if (response.data.hasActiveSubscription) {
                 setHasActiveSubscription(true);
                 setSubscriptionDetails({
                     ...response.data.subscription,
-                    sessionsRemaining: response.data.subscription.sessionsRemaining,
-                    totalSessions: response.data.subscription.totalSessions
+                    sessionsRemaining: response.data.remainingSessions, 
+                    totalSessions: response.data.subscription.maxBookingsPerMonth
                 });
             } else {
                 setHasActiveSubscription(false);
@@ -158,6 +163,34 @@ const BookingsPage = () => {
             console.error("Error checking subscription status:", error);
             setHasActiveSubscription(false);
             setSubscriptionDetails(null);
+        }
+    };
+
+    // Fetch outstanding payment amount
+    const fetchOutstandingPayments = async () => {
+        try {
+            const response = await axios.get(
+                `${process.env.REACT_APP_BACKEND_URL}/api/payment/amount-due`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            
+            console.log("Outstanding payment response:", response.data);
+            if (response.data && response.data.amountDue) {
+                setOutstandingPayment(response.data.amountDue);
+            }
+            
+            // Also fetch pending payments
+            const paymentsResponse = await axios.get(
+                `${process.env.REACT_APP_BACKEND_URL}/api/payment/history`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            
+            if (paymentsResponse.data && paymentsResponse.data.payments) {
+                const pending = paymentsResponse.data.payments.filter(p => p.status === 'pending');
+                setPendingPayments(pending);
+            }
+        } catch (error) {
+            console.error("Error fetching outstanding payments:", error);
         }
     };
 
@@ -176,22 +209,46 @@ const BookingsPage = () => {
                             { headers: { Authorization: `Bearer ${token}` } }
                         );
 
+                        // Process availability data to include session prices
+                        let availability = [];
+                        
+                        if (Array.isArray(availabilityResponse.data)) {
+                            // Handle array format
+                            availability = availabilityResponse.data.map(slot => ({
+                                day: slot.day,
+                                time: slot.time.map(t => ({
+                                    datetime: new Date(typeof t === 'object' ? t.datetime : t),
+                                    price: typeof t === 'object' ? t.price : (trainer.sessionPrice || 10)
+                                })),
+                            }));
+                        } else if (availabilityResponse.data.availability && Array.isArray(availabilityResponse.data.availability)) {
+                            // Handle { availability: [...] } format
+                            availability = availabilityResponse.data.availability.map(slot => ({
+                                day: slot.day,
+                                time: slot.time.map(t => ({
+                                    datetime: new Date(typeof t === 'object' ? t.datetime : t),
+                                    price: typeof t === 'object' ? t.price : (trainer.sessionPrice || 10)
+                                })),
+                            }));
+                        } else {
+                            console.warn("Unexpected availability format:", availabilityResponse.data);
+                            availability = [];
+                        }
+
                         return {
                             ...trainer,
-                            availability: availabilityResponse.data.map(slot => ({
-                                day: slot.day,
-                                time: slot.time.map(t => new Date(t)),
-                            })),
+                            availability,
+                            sessionPrice: trainer.sessionPrice || (availability[0]?.time[0]?.price || 10)
                         };
                     } catch (error) {
                         // Silently handle 404 errors for missing availability
                         if (error.response?.status === 404) {
-                            return { ...trainer, availability: [] };
+                            return { ...trainer, availability: [], sessionPrice: trainer.sessionPrice || 10 };
                         }
                         // Log other errors but don't show them to the user
                         console.error(`Error fetching availability for ${trainer?.username || trainer?._id || "unknown"}:`,
                             error.response?.data || error.message);
-                        return { ...trainer, availability: [] };
+                        return { ...trainer, availability: [], sessionPrice: trainer.sessionPrice || 10 };
                     }
                 })
             );
@@ -205,6 +262,7 @@ const BookingsPage = () => {
                 setError(null);
             }
 
+            console.log("Available trainers:", availableTrainers);
             setTrainers(availableTrainers);
             setLoading(false);
         } catch (error) {
@@ -243,15 +301,23 @@ const BookingsPage = () => {
     const isSessionBooked = (trainerId, sessionTime) => {
         return bookings.some((booking) => {
             const bookingTrainerId = booking.trainerId?._id || booking.trainerId;
-            return bookingTrainerId === trainerId &&
-                new Date(booking.sessionTime).getTime() === new Date(sessionTime).getTime();
+            const bookingTime = new Date(booking.sessionTime).getTime();
+            const compareTime = sessionTime instanceof Date ? 
+                sessionTime.getTime() : 
+                new Date(sessionTime).getTime();
+                
+            return bookingTrainerId === trainerId && bookingTime === compareTime;
         });
     };
 
     // Check if a session time is in the past
     const isSessionInPast = (sessionTime) => {
         const now = new Date();
-        return new Date(sessionTime) < now;
+        const sessionDate = sessionTime instanceof Date ? 
+            sessionTime : 
+            new Date(sessionTime);
+            
+        return sessionDate < now;
     };
 
     // Check if a session is available (not booked and not in the past)
@@ -266,14 +332,18 @@ const BookingsPage = () => {
         setSelectedSession(null);
     };
 
-    const handleSelectSession = (trainerId, day, time) => {
-        if (!isSessionAvailable(trainerId, time)) return;
+    const handleSelectSession = (trainerId, day, session) => {
+        if (!isSessionAvailable(trainerId, session.datetime)) return;
 
-        setSelectedSession({ trainerId, day, time });
+        setSelectedSession({ 
+            trainerId, 
+            day, 
+            time: session.datetime,
+            price: session.price 
+        });
 
-        // If user has an active subscription, show subscription choice modal
-        // Otherwise, go directly to payment step
-        if (hasActiveSubscription) {
+        // If user has an active subscription with remaining sessions, show subscription choice modal
+        if (hasActiveSubscription && subscriptionDetails && subscriptionDetails.sessionsRemaining > 0) {
             setShowSubscriptionChoice(true);
         } else {
             setBookingStep(3); // Go directly to payment step
@@ -290,6 +360,9 @@ const BookingsPage = () => {
         setPaymentSuccess(true);
         setPaymentProcessing(false);
         completeBooking("creditCard");
+        
+        // Refresh outstanding payments data
+        fetchOutstandingPayments();
     };
 
     // Handle payment error
@@ -304,44 +377,43 @@ const BookingsPage = () => {
             alert("Please select a session before booking.");
             return;
         }
-
-        const { trainerId, time } = selectedSession;
-
+      
+        const { trainerId, time, price } = selectedSession;
+      
         if (!isSessionAvailable(trainerId, time)) {
             alert("⚠️ This session is no longer available.");
             return;
         }
-
+      
         // Create a Date object from the time
         const sessionDate = new Date(time);
-
-        // Extract date and time parts to match the model's expected format
+      
+        // Format data properly to match backend expectations
         const requestData = {
             trainerId,
-            clientId,
-            // Keep the original sessionTime for backward compatibility
             sessionTime: sessionDate.toISOString(),
-            // Add separate date and time fields that the model expects
-            date: sessionDate.toISOString().split('T')[0],  // YYYY-MM-DD format
-            time: sessionDate.toISOString().split('T')[1].substring(0, 8),  // HH:MM:SS format
-            paymentMethod: finalPaymentMethod || paymentMethod
+            paymentMethod: finalPaymentMethod || paymentMethod,
+            sessionPrice: price // Include session price
         };
-
+      
         try {
+            console.log("Sending booking request:", requestData);
+          
             const response = await axios.post(
                 `${process.env.REACT_APP_BACKEND_URL}/api/booking/book-session`,
                 requestData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-
+      
             // Update subscription details if using subscription
             if (finalPaymentMethod === "subscription" && response.data.subscription) {
                 setSubscriptionDetails(response.data.subscription);
             }
-
+      
             alert(`✅ ${response.data.message}`);
             fetchClientBookings();
             checkSubscriptionStatus();
+            fetchOutstandingPayments(); // Refresh payment data
             resetBookingProcess();
         } catch (error) {
             console.error("Error booking session:", error.response?.data || error.message);
@@ -370,6 +442,10 @@ const BookingsPage = () => {
 
         // For "Use Subscription" option
         if (paymentMethod === "subscription") {
+            if (!subscriptionDetails || subscriptionDetails.sessionsRemaining <= 0) {
+                alert("⚠️ You don't have any sessions remaining in your subscription.");
+                return;
+            }
             completeBooking("subscription");
             return;
         }
@@ -383,12 +459,20 @@ const BookingsPage = () => {
         setBookingStep(1);
         setPaymentSuccess(false);
         setShowStripeForm(false);
-        setCurrentBookingId(null); // Reset the current booking ID
+        setCurrentBookingId(null);
     };
 
     // Format date for display - enhanced with detailed date
     const formatDate = (date) => {
-        return date.toLocaleDateString(undefined, {
+        if (!date) return "";
+        
+        const dateObj = date instanceof Date ? date : new Date(date);
+        
+        if (isNaN(dateObj.getTime())) {
+            return "Invalid date";
+        }
+        
+        return dateObj.toLocaleDateString(undefined, {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
@@ -396,19 +480,36 @@ const BookingsPage = () => {
         });
     };
 
-    // Calculate session cost
-    const getSessionCost = () => {
-        if (!selectedSession || !selectedTrainer) return 0;
+    // Format time without the full date
+    const formatTime = (date) => {
+        if (!date) return "";
+        
+        const dateObj = date instanceof Date ? date : new Date(date);
+        
+        if (isNaN(dateObj.getTime())) {
+            return "Invalid time";
+        }
+        
+        return dateObj.toLocaleTimeString([], { 
+            hour: "2-digit", 
+            minute: "2-digit" 
+        });
+    };
 
-        const baseRate = selectedTrainer.hourlyRate || 10;
+    // Calculate session cost - now using the session's price from the backend
+    const getSessionCost = () => {
+        if (!selectedSession) return 0;
+
+        // Get base price from the selected session
+        const basePrice = selectedSession.price || 10;
 
         // Apply discount if using subscription
         if (paymentMethod === "subscription" && subscriptionDetails) {
             const discountPercent = subscriptionDetails.sessionDiscount || 0;
-            return baseRate * (1 - discountPercent / 100);
+            return (basePrice * (1 - discountPercent / 100)).toFixed(2);
         }
 
-        return baseRate;
+        return basePrice;
     };
 
     return (
@@ -421,6 +522,15 @@ const BookingsPage = () => {
                 <div className={`bp-step ${bookingStep >= 2 ? 'bp-step-active' : ''}`}>2. Pick Date & Time</div>
                 <div className={`bp-step ${bookingStep >= 3 ? 'bp-step-active' : ''}`}>3. Confirm Payment</div>
             </div>
+
+            {/* Subscription Status */}
+            {hasActiveSubscription && (
+                <div className="bp-subscription-status">
+                    <h3>📅 Your Subscription Plan: {subscriptionDetails?.planType || 'Basic'}</h3>
+                    <p>Sessions remaining this month: <strong>{subscriptionDetails?.sessionsRemaining || 0}</strong> / {subscriptionDetails?.totalSessions || 0}</p>
+                    <p>Valid until: <strong>{formatDate(subscriptionDetails?.endDate)}</strong></p>
+                </div>
+            )}
 
             {/* Step 1: Select Trainer */}
             {bookingStep === 1 && (
@@ -447,13 +557,13 @@ const BookingsPage = () => {
                                     </div>
                                     <h3>{trainer.username}</h3>
                                     <p className="bp-trainer-specialties">
-                                        <strong>Specialties:</strong> {trainer.specialties.join(", ")}
+                                        <strong>Specialties:</strong> {trainer.specialties?.join(", ") || "General Fitness"}
                                     </p>
                                     <p className="bp-trainer-experience">
                                         <strong>Experience:</strong> {trainer.yearsOfExperience || "N/A"} years
                                     </p>
                                     <p className="bp-trainer-rate">
-                                        <strong>Rate:</strong> ${trainer.hourlyRate || 10}/hour
+                                        <strong>Rate:</strong> ${trainer.sessionPrice || 10}/session
                                     </p>
                                     <button className="bp-select-button">Select</button>
                                 </div>
@@ -529,16 +639,15 @@ const BookingsPage = () => {
                     {selectedTrainer.availability.length > 0 ? (
                         <div className="bp-availability-calendar">
                             {selectedTrainer.availability.map((slot, index) => {
-                                // Get actual date objects for this slot (not just day of week)
-                                // This assumes the time array contains complete date info
-                                const hasAvailableTimes = slot.time.length > 0 &&
-                                    slot.time.some(time => isSessionAvailable(selectedTrainer._id, time));
+                                // Check if the slot has any available times
+                                const hasAvailableTimes = slot.time && slot.time.length > 0 &&
+                                    slot.time.some(time => isSessionAvailable(selectedTrainer._id, time.datetime));
 
                                 // Skip days with no available times
                                 if (!hasAvailableTimes) return null;
 
                                 // Get the date for the first available time slot to show full date
-                                const slotDate = slot.time.length > 0 ? slot.time[0] : new Date();
+                                const slotDate = slot.time.length > 0 ? slot.time[0].datetime : new Date();
 
                                 return (
                                     <div key={index} className="bp-day-column">
@@ -546,13 +655,16 @@ const BookingsPage = () => {
                                             {slot.day} - {formatDate(slotDate)}
                                         </h3>
                                         <div className="bp-time-slots">
-                                            {slot.time.length > 0 ? (
-                                                slot.time.map((time, i) => {
+                                            {slot.time && slot.time.length > 0 ? (
+                                                slot.time.map((timeSlot, i) => {
+                                                    // Skip if the session time is invalid
+                                                    if (!timeSlot || !timeSlot.datetime) return null;
+                                                    
                                                     // Check if session is in the past
-                                                    const isPast = isSessionInPast(time);
+                                                    const isPast = isSessionInPast(timeSlot.datetime);
 
                                                     // Check if session is booked
-                                                    const isBooked = isSessionBooked(selectedTrainer._id, time);
+                                                    const isBooked = isSessionBooked(selectedTrainer._id, timeSlot.datetime);
 
                                                     // Skip past sessions completely
                                                     if (isPast) return null;
@@ -560,12 +672,17 @@ const BookingsPage = () => {
                                                     return (
                                                         <button
                                                             key={i}
-                                                            onClick={() => handleSelectSession(selectedTrainer._id, slot.day, time)}
+                                                            onClick={() => handleSelectSession(selectedTrainer._id, slot.day, timeSlot)}
                                                             className={`bp-time-slot ${isBooked ? "bp-booked" : ""}`}
                                                             disabled={isBooked}
                                                         >
-                                                            {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                                                            {isBooked && " (Booked)"}
+                                                            <div className="bp-time-display">
+                                                                {formatTime(timeSlot.datetime)}
+                                                            </div>
+                                                            <div className="bp-price-display">
+                                                                ${timeSlot.price || selectedTrainer.sessionPrice || 10}
+                                                            </div>
+                                                            {isBooked && <div className="bp-booked-badge">Booked</div>}
                                                         </button>
                                                     );
                                                 }).filter(Boolean)  // Remove null items
@@ -574,8 +691,8 @@ const BookingsPage = () => {
                                             )}
 
                                             {/* Show this if all slots were filtered out due to being in the past */}
-                                            {slot.time.length > 0 &&
-                                                slot.time.every(time => isSessionInPast(time)) &&
+                                            {slot.time && slot.time.length > 0 &&
+                                                slot.time.every(time => isSessionInPast(time.datetime)) &&
                                                 <p className="bp-no-slots">No future slots available</p>}
                                         </div>
                                     </div>
@@ -583,8 +700,8 @@ const BookingsPage = () => {
                             }).filter(Boolean)}  {/* Filter out null days */}
 
                             {selectedTrainer.availability.filter(slot =>
-                                slot.time.length > 0 &&
-                                slot.time.some(time => isSessionAvailable(selectedTrainer._id, time))
+                                slot.time && slot.time.length > 0 &&
+                                slot.time.some(time => isSessionAvailable(selectedTrainer._id, time.datetime))
                             ).length === 0 && (
                                 <div className="bp-no-availability">
                                     <p>This trainer has no available future time slots.</p>
@@ -609,15 +726,23 @@ const BookingsPage = () => {
                         <h3>Booking Details:</h3>
                         <p><strong>Trainer:</strong> {trainers.find(t => t._id === selectedSession.trainerId)?.username}</p>
                         <p><strong>Date:</strong> {formatDate(selectedSession.time)}</p>
-                        <p><strong>Time:</strong> {selectedSession.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-                        <p><strong>Session Fee:</strong> ${getSessionCost()}</p>
+                        <p><strong>Time:</strong> {formatTime(selectedSession.time)}</p>
+                        <p><strong>Session Fee:</strong> <span className="bp-price-highlight">${selectedSession.price || getSessionCost()}</span></p>
+                        
+                        {/* Show balance notification for in-person payments */}
+                        {outstandingPayment > 0 && (
+                            <div className="bp-outstanding-notice">
+                                <p><strong>Note:</strong> You have an outstanding balance of ${outstandingPayment.toFixed(2)}. 
+                                This new session will be added to your account.</p>
+                            </div>
+                        )}
                     </div>
 
                     {!showStripeForm ? (
                         <div className="bp-payment-methods">
                             <h3>Select Payment Method:</h3>
                             <div className="bp-payment-options">
-                                {hasActiveSubscription && (
+                                {hasActiveSubscription && subscriptionDetails && subscriptionDetails.sessionsRemaining > 0 && (
                                     <label className="bp-payment-option">
                                         <input
                                             type="radio"
@@ -626,7 +751,12 @@ const BookingsPage = () => {
                                             checked={paymentMethod === "subscription"}
                                             onChange={() => setPaymentMethod("subscription")}
                                         />
-                                        <span className="bp-payment-label">Use Subscription</span>
+                                        <span className="bp-payment-label">
+                                            Use Subscription 
+                                            <span className="bp-sessions-left">
+                                                ({subscriptionDetails.sessionsRemaining} sessions left)
+                                            </span>
+                                        </span>
                                     </label>
                                 )}
 
@@ -649,8 +779,25 @@ const BookingsPage = () => {
                                         checked={paymentMethod === "inPerson"}
                                         onChange={() => setPaymentMethod("inPerson")}
                                     />
-                                    <span className="bp-payment-label">Pay at Gym</span>
+                                    <span className="bp-payment-label">Pay at Gym (Cash)</span>
                                 </label>
+                            </div>
+
+                            <div className="bp-payment-details">
+                                {paymentMethod === "subscription" && (
+                                    <div className="bp-subscription-payment-info">
+                                        <p>You'll use 1 session from your subscription.</p>
+                                        <p>After this booking, you'll have {subscriptionDetails?.sessionsRemaining - 1} sessions remaining.</p>
+                                    </div>
+                                )}
+                                
+                                {paymentMethod === "inPerson" && (
+                                    <div className="bp-inperson-payment-info">
+                                        <p>Your session fee of ${selectedSession.price || getSessionCost()} will be added to your account.</p>
+                                        <p>Please pay at the gym during your session.</p>
+                                        <p>New total balance due: ${(parseFloat(outstandingPayment) + parseFloat(selectedSession.price || getSessionCost())).toFixed(2)}</p>
+                                    </div>
+                                )}
                             </div>
 
                             <button
@@ -668,8 +815,8 @@ const BookingsPage = () => {
                             <h3>Enter Card Details</h3>
                             <Elements stripe={stripePromise}>
                                 <PaymentForm
-                                    amount={getSessionCost()}
-                                    bookingId={currentBookingId} // Use the stored booking ID here
+                                    amount={selectedSession.price || getSessionCost()}
+                                    bookingId={currentBookingId}
                                     onSuccess={handlePaymentSuccess}
                                     onError={handlePaymentError}
                                 />
@@ -720,7 +867,10 @@ const BookingsPage = () => {
                                         <strong>{booking.trainerId?.username || "Trainer (Deleted)"}</strong>
                                     </div>
                                     <div className="bp-booking-datetime">
-                                        {sessionDate.toLocaleDateString()} at {sessionDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {formatDate(sessionDate)} at {formatTime(sessionDate)}
+                                    </div>
+                                    <div className="bp-booking-price">
+                                        ${booking.sessionPrice || "10.00"}
                                     </div>
                                     <div className="bp-booking-status">
                                         {isUpcoming ? "Upcoming" : "Completed"}
@@ -740,7 +890,8 @@ const BookingsPage = () => {
                                                         // Set up the payment process
                                                         setSelectedSession({
                                                             trainerId: booking.trainerId?._id || booking.trainerId,
-                                                            time: new Date(booking.sessionTime)
+                                                            time: new Date(booking.sessionTime),
+                                                            price: booking.sessionPrice || 10
                                                         });
                                                         setPaymentMethod("creditCard");
                                                         setShowStripeForm(true);

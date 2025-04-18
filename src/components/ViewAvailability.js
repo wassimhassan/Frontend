@@ -139,13 +139,24 @@ const ViewAvailability = () => {
 
     // Toggle session completion status
     const toggleSessionStatus = async (bookingId, currentStatus) => {
-        try {
-            const newStatus = !currentStatus;
-            await axios.put(
-                `${process.env.REACT_APP_BACKEND_URL}/api/booking/booking/${bookingId}/toggle-status`,
-                { completed: newStatus },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+        try{
+         // Find the booking first
+         const booking = bookings.find(b => b._id === bookingId);
+         if (!booking) return;
+         
+         const newStatus = !currentStatus;
+         
+         // Include the required fields in the request
+         await axios.put(
+             `${process.env.REACT_APP_BACKEND_URL}/api/booking/booking/${bookingId}/toggle-status`,
+             { 
+                 completed: newStatus,
+                 // Add any required fields from the existing booking
+                 date: booking.date || new Date(booking.sessionTime).toISOString().split('T')[0],
+                 time: booking.time || new Date(booking.sessionTime).toTimeString().split(' ')[0]
+             },
+             { headers: { Authorization: `Bearer ${token}` } }
+         );
 
             // Update the booking in the state
             setBookings(prevBookings =>
