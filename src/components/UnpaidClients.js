@@ -38,52 +38,51 @@ const UnpaidClients = () => {
 
   const handleCashPayment = async () => {
     if (!selectedClient || !paymentAmount) {
-      alert("Please select a client and enter a payment amount.");
-      return;
+        alert("Please select a client and enter a payment amount.");
+        return;
     }
-  
+
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/gym-owner/accept-cash-payment`,
-        {
-          clientId: selectedClient._id,
-          amount: parseFloat(paymentAmount),
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-  
-      // Get the updated client data from the response
-      const updatedClient = response.data.client;
-  
-      // Update the clients list with the updated client balance
-      if (updatedClient.balanceDue <= 0) {
-        // If balance is zero, remove client from the list
-        setClients((prevClients) => 
-          prevClients.filter((client) => client._id !== updatedClient._id)
+        const response = await axios.post(
+            `${process.env.REACT_APP_BACKEND_URL}/api/gym-owner/accept-cash-payment`,
+            {
+                clientId: selectedClient._id,
+                amount: parseFloat(paymentAmount),
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
         );
-      } else {
-        // Otherwise update the balance
-        setClients((prevClients) => 
-          prevClients.map((client) =>
-            client._id === updatedClient._id ? { ...client, balanceDue: updatedClient.balanceDue } : client
-          )
-        );
-      }
-  
-      // Close the modal and reset states
-      setShowPaymentModal(false);
-      setSelectedClient(null);
-      setPaymentAmount("");
-  
-      // Optional: fetch all unpaid clients again to ensure data consistency
-      fetchUnpaidClients();
-      
-      alert("Cash payment recorded successfully!");
+
+        // Close the modal first
+        setShowPaymentModal(false);
+        setSelectedClient(null);
+        setPaymentAmount("");
+
+        // Update the clients list with the new balance
+        setClients(prevClients => {
+            const updatedClients = prevClients.map(client => {
+                if (client._id === response.data.client._id) {
+                    return {
+                        ...client,
+                        balanceDue: response.data.client.balanceDue
+                    };
+                }
+                return client;
+            }).filter(client => client.balanceDue > 0); // Remove clients with zero balance
+
+            return updatedClients;
+        });
+
+        // Fetch updated data after a short delay
+        setTimeout(() => {
+            fetchUnpaidClients();
+        }, 500);
+
+        alert("Cash payment recorded successfully!");
     } catch (error) {
-      console.error("Error processing cash payment:", error);
-      alert(error.response?.data?.message || "Failed to process payment");
+        console.error("Error processing cash payment:", error);
+        alert(error.response?.data?.message || "Failed to process payment");
     }
-  };
+};
 
   return (
     <div className="unpaid-container">

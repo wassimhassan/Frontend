@@ -138,6 +138,11 @@ const BookingsPage = () => {
         fetchOutstandingPayments();
     }, []);
 
+    // Navigate to subscription page
+    const goToSubscriptionPage = () => {
+        navigate("/subscribe");
+    };
+
     // Check if user has an active subscription
     const checkSubscriptionStatus = async () => {
         try {
@@ -145,16 +150,13 @@ const BookingsPage = () => {
                 `${process.env.REACT_APP_BACKEND_URL}/api/subscriptions/subscription-status`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-
+    
             console.log("Subscription status response:", response.data);
-
+    
             if (response.data.hasActiveSubscription) {
                 setHasActiveSubscription(true);
-                setSubscriptionDetails({
-                    ...response.data.subscription,
-                    sessionsRemaining: response.data.remainingSessions, 
-                    totalSessions: response.data.subscription.maxBookingsPerMonth
-                });
+                // Simply use the subscription object directly - it already has the needed fields
+                setSubscriptionDetails(response.data.subscription);
             } else {
                 setHasActiveSubscription(false);
                 setSubscriptionDetails(null);
@@ -516,21 +518,34 @@ const BookingsPage = () => {
         <div className="bp-bookings-page">
             <h1 className="bp-page-title">Book Your Training Session</h1>
 
+            {/* Subscription Banner - New Component */}
+            <div className="bp-subscription-banner">
+                {hasActiveSubscription ? (
+                    <div className="bp-subscription-active">
+                        <h3>📅 Your Subscription Plan: {subscriptionDetails?.planType || 'Basic'}</h3>
+                        <p>Sessions remaining this month: <strong>{subscriptionDetails?.sessionsRemaining || 0}</strong> / {subscriptionDetails?.totalSessions || 0}</p>
+                        <p>Valid until: <strong>{formatDate(subscriptionDetails?.endDate)}</strong></p>
+                    </div>
+                ) : (
+                    <div className="bp-subscription-inactive">
+                        <h3>No Active Subscription</h3>
+                        <p>Subscribe to a plan and save on booking fees!</p>
+                        <button 
+                            className="bp-subscribe-button"
+                            onClick={goToSubscriptionPage}
+                        >
+                            Get a Subscription
+                        </button>
+                    </div>
+                )}
+            </div>
+
             {/* Progress Steps */}
             <div className="bp-booking-steps">
                 <div className={`bp-step ${bookingStep >= 1 ? 'bp-step-active' : ''}`}>1. Select Trainer</div>
                 <div className={`bp-step ${bookingStep >= 2 ? 'bp-step-active' : ''}`}>2. Pick Date & Time</div>
                 <div className={`bp-step ${bookingStep >= 3 ? 'bp-step-active' : ''}`}>3. Confirm Payment</div>
             </div>
-
-            {/* Subscription Status */}
-            {hasActiveSubscription && (
-                <div className="bp-subscription-status">
-                    <h3>📅 Your Subscription Plan: {subscriptionDetails?.planType || 'Basic'}</h3>
-                    <p>Sessions remaining this month: <strong>{subscriptionDetails?.sessionsRemaining || 0}</strong> / {subscriptionDetails?.totalSessions || 0}</p>
-                    <p>Valid until: <strong>{formatDate(subscriptionDetails?.endDate)}</strong></p>
-                </div>
-            )}
 
             {/* Step 1: Select Trainer */}
             {bookingStep === 1 && (
@@ -596,10 +611,9 @@ const BookingsPage = () => {
                                 <p>You have an active subscription! You can use it for this booking or pay separately.</p>
 
                                 <div className="bp-subscription-info">
-                                    <p>Your subscription plan: <strong>{subscriptionDetails?.planType || 'Basic'}</strong></p>
-                                    <p>Sessions remaining this month: <strong>{subscriptionDetails?.sessionsRemaining || 0}</strong></p>
-                                </div>
-
+  <p>Your subscription plan: <strong>{subscriptionDetails?.planType || 'Basic'}</strong></p>
+  <p>Sessions remaining this month: {subscriptionDetails?.sessionsRemaining || 0} / {subscriptionDetails?.totalSessions || 0}</p>
+</div>
                                 <div className="bp-subscription-buttons">
                                     <button
                                         className="bp-subscribe-button"
@@ -723,93 +737,124 @@ const BookingsPage = () => {
                     </button>
 
                     <div className="bp-booking-summary">
-                        <h3>Booking Details:</h3>
-                        <p><strong>Trainer:</strong> {trainers.find(t => t._id === selectedSession.trainerId)?.username}</p>
-                        <p><strong>Date:</strong> {formatDate(selectedSession.time)}</p>
-                        <p><strong>Time:</strong> {formatTime(selectedSession.time)}</p>
-                        <p><strong>Session Fee:</strong> <span className="bp-price-highlight">${selectedSession.price || getSessionCost()}</span></p>
-                        
-                        {/* Show balance notification for in-person payments */}
-                        {outstandingPayment > 0 && (
-                            <div className="bp-outstanding-notice">
-                                <p><strong>Note:</strong> You have an outstanding balance of ${outstandingPayment.toFixed(2)}. 
-                                This new session will be added to your account.</p>
-                            </div>
-                        )}
-                    </div>
+  <h3>Booking Details:</h3>
+  <p><strong>Trainer:</strong> {trainers.find(t => t._id === selectedSession.trainerId)?.username}</p>
+  <p><strong>Date:</strong> {formatDate(selectedSession.time)}</p>
+  <p><strong>Time:</strong> {formatTime(selectedSession.time)}</p>
+  
+  {/* Enhanced price display with subscription benefit */}
+  {paymentMethod === "subscription" && subscriptionDetails?.sessionDiscount > 0 ? (
+    <div className="bp-price-with-discount">
+      <p><strong>Regular price:</strong> <span className="bp-price-crossed">${selectedSession.price || 10}</span></p>
+      <p><strong>Your price:</strong> <span className="bp-price-highlight">${getSessionCost()}</span> 
+        <span className="bp-discount-tag">{subscriptionDetails.sessionDiscount}% off with subscription</span>
+      </p>
+    </div>
+  ) : (
+    <p><strong>Session Fee:</strong> <span className="bp-price-highlight">${selectedSession.price || getSessionCost()}</span></p>
+  )}
+  
+  {/* Show balance notification for in-person payments */}
+  {outstandingPayment > 0 && (
+    <div className="bp-outstanding-notice">
+      <p><strong>Note:</strong> You have an outstanding balance of ${outstandingPayment.toFixed(2)}. 
+      This new session will be added to your account.</p>
+    </div>
+  )}
+</div>
 
                     {!showStripeForm ? (
                         <div className="bp-payment-methods">
-                            <h3>Select Payment Method:</h3>
-                            <div className="bp-payment-options">
-                                {hasActiveSubscription && subscriptionDetails && subscriptionDetails.sessionsRemaining > 0 && (
-                                    <label className="bp-payment-option">
-                                        <input
-                                            type="radio"
-                                            name="payment"
-                                            value="subscription"
-                                            checked={paymentMethod === "subscription"}
-                                            onChange={() => setPaymentMethod("subscription")}
-                                        />
-                                        <span className="bp-payment-label">
-                                            Use Subscription 
-                                            <span className="bp-sessions-left">
-                                                ({subscriptionDetails.sessionsRemaining} sessions left)
-                                            </span>
-                                        </span>
-                                    </label>
-                                )}
+    <h3>Select Payment Method:</h3>
+    <div className="bp-payment-options">
+        {hasActiveSubscription && subscriptionDetails && subscriptionDetails.sessionsRemaining > 0 ? (
+            <label className="bp-payment-option bp-payment-option-subscription">
+                <input
+                    type="radio"
+                    name="payment"
+                    value="subscription"
+                    checked={paymentMethod === "subscription"}
+                    onChange={() => setPaymentMethod("subscription")}
+                />
+                <div className="bp-payment-label-container">
+                    <span className="bp-payment-label">
+                        Use Subscription 
+                        <span className="bp-sessions-left">
+                            ({subscriptionDetails.sessionsRemaining} sessions left)
+                        </span>
+                    </span>
+                    <span className="bp-payment-discount">
+                        {subscriptionDetails.sessionDiscount}% off regular price
+                    </span>
+                </div>
+            </label>
+        ) : (
+            <div className="bp-payment-option-subscribe">
+                <p>No active subscription or no sessions remaining</p>
+                <button 
+                    className="bp-subscribe-now-button"
+                    onClick={goToSubscriptionPage}
+                >
+                    Subscribe Now
+                </button>
+            </div>
+        )}
 
-                                <label className="bp-payment-option">
-                                    <input
-                                        type="radio"
-                                        name="payment"
-                                        value="creditCard"
-                                        checked={paymentMethod === "creditCard"}
-                                        onChange={() => setPaymentMethod("creditCard")}
-                                    />
-                                    <span className="bp-payment-label">Credit Card</span>
-                                </label>
+        <label className="bp-payment-option">
+            <input
+                type="radio"
+                name="payment"
+                value="creditCard"
+                checked={paymentMethod === "creditCard"}
+                onChange={() => setPaymentMethod("creditCard")}
+            />
+            <span className="bp-payment-label">Credit Card</span>
+        </label>
 
-                                <label className="bp-payment-option">
-                                    <input
-                                        type="radio"
-                                        name="payment"
-                                        value="inPerson"
-                                        checked={paymentMethod === "inPerson"}
-                                        onChange={() => setPaymentMethod("inPerson")}
-                                    />
-                                    <span className="bp-payment-label">Pay at Gym (Cash)</span>
-                                </label>
-                            </div>
+        <label className="bp-payment-option">
+            <input
+                type="radio"
+                name="payment"
+                value="inPerson"
+                checked={paymentMethod === "inPerson"}
+                onChange={() => setPaymentMethod("inPerson")}
+            />
+            <span className="bp-payment-label">Pay at Gym (Cash)</span>
+        </label>
+    </div>
 
-                            <div className="bp-payment-details">
-                                {paymentMethod === "subscription" && (
-                                    <div className="bp-subscription-payment-info">
-                                        <p>You'll use 1 session from your subscription.</p>
-                                        <p>After this booking, you'll have {subscriptionDetails?.sessionsRemaining - 1} sessions remaining.</p>
-                                    </div>
-                                )}
-                                
-                                {paymentMethod === "inPerson" && (
-                                    <div className="bp-inperson-payment-info">
-                                        <p>Your session fee of ${selectedSession.price || getSessionCost()} will be added to your account.</p>
-                                        <p>Please pay at the gym during your session.</p>
-                                        <p>New total balance due: ${(parseFloat(outstandingPayment) + parseFloat(selectedSession.price || getSessionCost())).toFixed(2)}</p>
-                                    </div>
-                                )}
-                            </div>
+    <div className="bp-payment-details">
+        {paymentMethod === "subscription" && (
+            <div className="bp-subscription-payment-info">
+                <p>You'll use 1 session from your subscription.</p>
+                <p>After this booking, you'll have {subscriptionDetails?.sessionsRemaining - 1} sessions remaining.</p>
+                {subscriptionDetails?.sessionDiscount > 0 && (
+                    <p className="bp-discount-info">
+                        Your subscription plan gives you a {subscriptionDetails.sessionDiscount}% discount!
+                    </p>
+                )}
+            </div>
+        )}
+        
+        {paymentMethod === "inPerson" && (
+            <div className="bp-inperson-payment-info">
+                <p>Your session fee of ${selectedSession.price || getSessionCost()} will be added to your account.</p>
+                <p>Please pay at the gym during your session.</p>
+                <p>New total balance due: ${(parseFloat(outstandingPayment) + parseFloat(selectedSession.price || getSessionCost())).toFixed(2)}</p>
+            </div>
+        )}
+    </div>
 
-                            <button
-                                className="bp-confirm-button"
-                                onClick={handleBookSession}
-                                disabled={!paymentMethod}
-                            >
-                                {paymentMethod === "subscription" ? "Book with Subscription" :
-                                    paymentMethod === "inPerson" ? "Book Now (Pay Later)" :
-                                        "Proceed to Payment"}
-                            </button>
-                        </div>
+    <button
+        className="bp-confirm-button"
+        onClick={handleBookSession}
+        disabled={!paymentMethod}
+    >
+        {paymentMethod === "subscription" ? "Book with Subscription" :
+            paymentMethod === "inPerson" ? "Book Now (Pay Later)" :
+                "Proceed to Payment"}
+    </button>
+</div>
                     ) : (
                         <div className="bp-stripe-payment">
                             <h3>Enter Card Details</h3>
