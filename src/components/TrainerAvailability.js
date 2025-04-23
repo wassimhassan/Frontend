@@ -307,7 +307,7 @@ const TrainerAvailability = () => {
 
       // Fetch trainer profile to get default session price first
       const profileResponse = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/trainers/trainer/profile`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/trainers/trainer/profile`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
