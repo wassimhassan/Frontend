@@ -452,7 +452,7 @@ const Chat = () => {
                   )}
                   {isTyping && (
                     <div className="typing-indicator">
-                      {selectedUser.name || selectedUser.username || 'User'} is typing...
+                     is typing...
                     </div>
                   )}
                   <div ref={chatEndRef} />
